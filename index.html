@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI 生图资产库</title>
+<meta name="description" content="AI 生图任务的 Prompt 模板与技能库总览。">
+<link rel="stylesheet" href="assets/app.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand" onclick="location.hash='#/'">
+      <div class="brand-mark"></div>
+      <h1>AI 生图资产库</h1>
+      <span>Prompt 模板 · 技能包</span>
+    </div>
+    <div class="topbar-spacer"></div>
+    <a class="topbar-link" href="https://github.com/Miracle-Shen/ai-image-skills" target="_blank" rel="noopener">GitHub</a>
+  </div>
+</header>
+
+<main class="wrap" id="app">
+  <div class="empty">加载中…</div>
+</main>
+
+<footer class="foot">
+  <p>站点数据源：<code>data/projects.js</code>（子项目注册表）与 <code>data/&lt;id&gt;.js</code>（各子项目内容）。
+  新增子项目后运行 <code>python3 tools/lint.py</code> 做一致性校验。</p>
+</footer>
+
+<script src="data/projects.js"></script>
+<script src="data/style-prompt.js"></script>
+<script src="assets/app.js"></script>
+</body>
+</html>

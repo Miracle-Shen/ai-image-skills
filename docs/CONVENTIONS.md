@@ -132,5 +132,65 @@ python3 tools/lint.py --check
 - `id` 与文件名一致
 - `variables` 声明的变量都在正文里出现过，且正文里的变量都声明了
 - 技能目录必须有 `SKILL.md`，且 frontmatter 有 `name` / `description`
+- 站点数据：子项目与数据文件一一对应、item 的 `id` 唯一、`no` 连续、
+  `group` 已在 `projects.js` 登记、`prompt` 含 `[subject]`
 
 有任何一项不过，退出码非 0。
+
+---
+
+## 七、子项目与站点数据
+
+站点只有一个页面（`index.html`），内容全部来自 `data/`。**加子项目不用改前端代码。**
+
+### 数据结构
+
+`data/projects.js` —— 子项目注册表：
+
+```js
+window.AIS_PROJECTS = [
+  { id, no, name, subtitle, desc, unit, status, groups, dataKey, accent }
+];
+```
+
+`data/<dataKey>.js` —— 该子项目的内容：
+
+```js
+window.AIS_ITEMS['<dataKey>'] = {
+  note: '页面顶部的用法说明',
+  items: [ { id, no, name, en, group, desc, keywords, prompt, negative, tip } ]
+};
+```
+
+| 字段 | 说明 |
+| --- | --- |
+| `id` | 小写字母/数字/中划线，**在本子项目内唯一** |
+| `no` | 展示用编号，**必须从 1 连续**（lint 会查） |
+| `group` | 必须出现在父子项目的 `groups` 数组里 |
+| `prompt` | **必须含 `[subject]` 占位符**（lint 会查） |
+| `keywords` | 非空数组，页面会渲染成标签 |
+| `negative` / `tip` | 可选，但强烈建议都写 |
+
+### 数据文件为什么是 `.js` 不是 `.json`
+
+页面用 `<script src>` 加载数据，**不是 `fetch`**。
+`file://` 下浏览器会拦截 `fetch` 本地文件（CORS），但 `<script src>` 可以。
+所以双击 `index.html` 就能用，不需要起服务器。
+
+**不要改成 `.json`。**
+
+### 加一个新子项目
+
+1. 新建 `data/<新id>.js`，挂到 `window.AIS_ITEMS['<新id>']`
+2. `data/projects.js` 追加一条，`dataKey` 指向它
+3. `index.html` 里加 `<script src="data/<新id>.js"></script>`
+4. `python3 tools/lint.py`
+
+`accent` 控制卡片左侧色条，用十六进制色值，例如 `#2f7fd9`。
+
+### 编号约定
+
+子项目的 `no` 从 1 连续。
+未上线的子项目用 `status: 'planned'` + `dataKey: null`，页面会渲染成灰色占位卡，
+不可点击。
+

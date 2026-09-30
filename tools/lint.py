@@ -12,16 +12,23 @@
 from __future__ import annotations
 
 import argparse
+import json
+import os
 import re
+import shutil
+import subprocess
 import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 PROMPTS_DIR = ROOT / "prompts"
 SKILLS_DIR = ROOT / "skills"
+DATA_DIR = ROOT / "data"
 
 CATEGORIES = ["game-assets", "character", "scene", "ui", "style"]
 REQUIRED_PROMPT_FIELDS = ["id", "title", "category", "tags", "version", "updated"]
+VALID_STATUS = ["ready", "planned"]
+ID_RE = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")
 
 SEMVER_RE = re.compile(r"^\d+\.\d+\.\d+$")
 DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
@@ -252,6 +259,188 @@ def write_index(target: Path, block: str, check_only: bool) -> None:
 
 
 # --------------------------------------------------------------------------- #
+# 站点数据校验（data/*.js）
+# --------------------------------------------------------------------------- #
+
+# 用一个极小的 Node 垫片把 window 全局掏出来，避免为 data 文件再写一个解析器。
+LOADER_JS = r"""
+global.window = global;
+const path = require('path');
+const root = process.env.AIS_ROOT;
+require(path.join(root, 'data', 'projects.js'));
+const projects = global.AIS_PROJECTS || [];
+for (const p of projects) {
+  if (p && p.dataKey) require(path.join(root, 'data', p.dataKey + '.js'));
+}
+process.stdout.write(JSON.stringify({
+  projects: projects,
+  items: global.AIS_ITEMS || {}
+}));
+"""
+
+
+def find_node() -> str | None:
+    for name in ("node",):
+        found = shutil.which(name)
+        if found:
+            return found
+
+    versions = Path.home() / ".workbuddy" / "binaries" / "node" / "versions"
+    if versions.is_dir():
+        for d in sorted(versions.iterdir(), reverse=True):
+            cand = d / "bin" / "node"
+            if cand.exists():
+                return str(cand)
+
+    for cand in ("/opt/homebrew/bin/node", "/usr/local/bin/node", "/usr/bin/node"):
+        if Path(cand).exists():
+            return cand
+    return None
+
+
+def load_site_data() -> tuple[dict | None, str | None]:
+    """返回 (数据, 错误信息)。没有 Node 或读不到数据时返回 (None, 原因)。"""
+    node = find_node()
+    if not node:
+        return None, "找不到 node，跳过站点数据校验"
+
+    loader = ROOT / ".lint-loader.cjs"
+    try:
+        loader.write_text(LOADER_JS, encoding="utf-8")
+        env = dict(os.environ, AIS_ROOT=str(ROOT))
+        proc = subprocess.run(
+            [node, str(loader)],
+            capture_output=True, text=True, timeout=30, env=env,
+        )
+    except Exception as exc:  # noqa: BLE001
+        return None, f"运行 node 失败：{exc}"
+    finally:
+        loader.unlink(missing_ok=True)
+
+    if proc.returncode != 0:
+        return None, f"data/*.js 加载失败：{proc.stderr.strip()[:400]}"
+
+    try:
+        return json.loads(proc.stdout), None
+    except json.JSONDecodeError as exc:
+        return None, f"data 输出不是合法 JSON：{exc}"
+
+
+def check_site(errors: list[str]) -> int:
+    """校验 data/projects.js 与 data/<id>.js 的一致性与完整性。"""
+    data, reason = load_site_data()
+    if data is None:
+        print(f"! {reason}", file=sys.stderr)
+        return 0
+
+    projects = data.get("projects") or []
+    all_items = data.get("items") or {}
+
+    if not projects:
+        errors.append("data/projects.js: 至少要有一个子项目")
+        return 0
+
+    seen_ids: set[str] = set()
+    seen_nos: list[int] = []
+
+    for p in projects:
+        pid = (p or {}).get("id", "<无 id>")
+        where = f"data/projects.js[{pid}]"
+
+        if not p.get("id"):
+            errors.append(f"{where}: 缺少 id")
+            continue
+        if not ID_RE.match(p["id"]):
+            errors.append(f"{where}: id `{p['id']}` 只能用小写字母/数字/中划线")
+        if p["id"] in seen_ids:
+            errors.append(f"{where}: id `{p['id']}` 重复")
+        seen_ids.add(p["id"])
+
+        for field in ("no", "name", "subtitle", "desc", "status"):
+            if p.get(field) in (None, ""):
+                errors.append(f"{where}: 缺少字段 `{field}`")
+
+        if isinstance(p.get("no"), int):
+            seen_nos.append(p["no"])
+        if p.get("status") not in VALID_STATUS:
+            errors.append(f"{where}: status `{p.get('status')}` 只能是 {'/'.join(VALID_STATUS)}")
+
+        data_key = p.get("dataKey")
+        if p.get("status") == "ready" and not data_key:
+            errors.append(f"{where}: status 为 ready 但没有 dataKey，页面拿不到内容")
+            continue
+        if not data_key:
+            continue
+
+        bundle = all_items.get(data_key)
+        if not bundle:
+            errors.append(f"{where}: dataKey `{data_key}` 找不到对应数据（应为 data/{data_key}.js）")
+            continue
+
+        data_file = DATA_DIR / f"{data_key}.js"
+        if not data_file.exists():
+            errors.append(f"{where}: 缺少数据文件 data/{data_key}.js")
+
+        items = bundle.get("items") or []
+        if not items:
+            errors.append(f"data/{data_key}.js: items 为空")
+            continue
+        if not bundle.get("note"):
+            errors.append(f"data/{data_key}.js: 缺少 note（页面顶部的用法说明）")
+
+        declared_groups = p.get("groups") or []
+        used_groups = {it.get("group") for it in items}
+        for g in sorted(used_groups - set(declared_groups)):
+            errors.append(
+                f"data/{data_key}.js: 分组 `{g}` 没有登记在 projects.js 的 groups 里"
+            )
+        for g in declared_groups:
+            if g not in used_groups:
+                errors.append(f"data/{data_key}.js: projects.js 里声明的分组 `{g}` 下没有内容")
+
+        item_ids: set[str] = set()
+        nos = []
+        for it in items:
+            iid = it.get("id", "<无 id>")
+            where_item = f"data/{data_key}.js[{iid}]"
+
+            if not it.get("id") or not ID_RE.match(it["id"]):
+                errors.append(f"{where_item}: id 缺失或格式非法（小写字母/数字/中划线）")
+            if it.get("id") in item_ids:
+                errors.append(f"{where_item}: id 重复")
+            item_ids.add(it.get("id"))
+
+            for field in ("no", "name", "en", "group", "desc", "prompt"):
+                if not it.get(field):
+                    errors.append(f"{where_item}: 缺少字段 `{field}`")
+
+            if not it.get("keywords"):
+                errors.append(f"{where_item}: keywords 不能为空")
+            if it.get("prompt") and "[subject]" not in it["prompt"]:
+                errors.append(f"{where_item}: prompt 里缺少 [subject] 占位符")
+            if isinstance(it.get("no"), int):
+                nos.append(it["no"])
+
+        if nos and sorted(nos) != list(range(1, len(nos) + 1)):
+            errors.append(
+                f"data/{data_key}.js: no 字段应是 1..{len(nos)} 连续编号，"
+                f"当前为 {sorted(nos)[:5]}{'…' if len(nos) > 5 else ''}"
+            )
+
+    if seen_nos and sorted(seen_nos) != list(range(1, len(seen_nos) + 1)):
+        errors.append(
+            f"data/projects.js: no 字段应是 1..{len(seen_nos)} 连续编号，当前为 {sorted(seen_nos)}"
+        )
+
+    declared_keys = {p.get("dataKey") for p in projects if p.get("dataKey")}
+    for key in all_items:
+        if key not in declared_keys:
+            errors.append(f"data/{key}.js: 这个数据文件没有被任何子项目引用")
+
+    return sum(len(all_items.get(k, {}).get("items", [])) for k in declared_keys)
+
+
+# --------------------------------------------------------------------------- #
 
 
 def main() -> int:
@@ -262,6 +451,7 @@ def main() -> int:
     errors: list[str] = []
     prompts = check_prompts(errors)
     skills = check_skills(errors)
+    site_items = check_site(errors)
 
     write_index(PROMPTS_DIR / "README.md", render_prompt_index(prompts), args.check)
     write_index(SKILLS_DIR / "README.md", render_skill_index(skills), args.check)
@@ -273,7 +463,10 @@ def main() -> int:
         print("", file=sys.stderr)
         return 1
 
-    print(f"✓ 通过：{len(prompts)} 个 prompt 模板，{len(skills)} 个技能包")
+    print(
+        f"✓ 通过：{len(prompts)} 个 prompt 模板，{len(skills)} 个技能包，"
+        f"{site_items} 条站点内容"
+    )
     return 0
 
 
