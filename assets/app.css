@@ -526,6 +526,118 @@ a { color: inherit; }
   font-size: 11.5px;
 }
 
+/* ---------- 参考图 ---------- */
+
+.shot {
+  margin: 0;
+  position: relative;
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--border);
+  cursor: zoom-in;
+  overflow: hidden;
+}
+
+.shot img {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 400px;
+  object-fit: cover;
+}
+
+.shot.is-missing {
+  cursor: default;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 120px;
+  background: repeating-linear-gradient(45deg,
+    #f4f2ee, #f4f2ee 9px, #faf9f7 9px, #faf9f7 18px);
+}
+.shot.is-missing span {
+  font-size: 12px;
+  color: var(--muted);
+  background: #fff;
+  border: 1px solid var(--border);
+  padding: 3px 11px;
+  border-radius: 999px;
+}
+
+.zoom-hint {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  font-size: 11.5px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: rgba(27, 26, 24, .74);
+  color: #fff;
+  opacity: 0;
+  transition: opacity .15s;
+  pointer-events: none;
+}
+.shot:hover .zoom-hint { opacity: 1; }
+
+.credit {
+  font-size: 12.5px;
+  color: var(--muted);
+  margin: -14px 0 22px;
+}
+
+/* ---------- 放大预览 ---------- */
+
+.lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(20, 18, 16, .87);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 30px;
+}
+.lightbox.is-open { display: flex; }
+
+.lightbox-inner {
+  width: 100%;
+  max-width: 1080px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.lightbox-inner img {
+  display: block;
+  margin: 0 auto;
+  max-width: 100%;
+  max-height: calc(100vh - 140px);
+  object-fit: contain;
+  border-radius: 8px;
+  background: var(--surface);
+}
+
+.lightbox-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  color: #e6e2db;
+  font-size: 13px;
+}
+
+.lightbox-close {
+  font-family: inherit;
+  font-size: 12.5px;
+  padding: 5px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, .3);
+  background: transparent;
+  color: #e6e2db;
+  cursor: pointer;
+  transition: .15s;
+}
+.lightbox-close:hover { background: rgba(255, 255, 255, .13); }
+
 /* ---------- 响应式 ---------- */
 
 @media (max-width: 700px) {

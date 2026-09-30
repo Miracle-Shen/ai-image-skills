@@ -30,6 +30,10 @@ REQUIRED_PROMPT_FIELDS = ["id", "title", "category", "tags", "version", "updated
 VALID_STATUS = ["ready", "planned"]
 ID_RE = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")
 
+REFS_DIR = ROOT / "assets" / "refs"
+IMAGE_EXT = {".jpg", ".jpeg", ".png", ".webp", ".avif", ".gif"}
+IMAGE_MAX_KB = 500
+
 SEMVER_RE = re.compile(r"^\d+\.\d+\.\d+$")
 DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 VARIABLE_RE = re.compile(r"\{\{([A-Z0-9_]+)\}\}")
@@ -326,19 +330,22 @@ def load_site_data() -> tuple[dict | None, str | None]:
         return None, f"data 输出不是合法 JSON：{exc}"
 
 
-def check_site(errors: list[str]) -> int:
-    """校验 data/projects.js 与 data/<id>.js 的一致性与完整性。"""
+def check_site(errors: list[str]) -> tuple[int, int]:
+    """校验 data/projects.js 与 data/<id>.js 的一致性与完整性。
+
+    返回 (内容总条数, 有参考图的条数)。
+    """
     data, reason = load_site_data()
     if data is None:
         print(f"! {reason}", file=sys.stderr)
-        return 0
+        return 0, 0
 
     projects = data.get("projects") or []
     all_items = data.get("items") or {}
 
     if not projects:
         errors.append("data/projects.js: 至少要有一个子项目")
-        return 0
+        return 0, 0
 
     seen_ids: set[str] = set()
     seen_nos: list[int] = []
@@ -421,6 +428,34 @@ def check_site(errors: list[str]) -> int:
             if isinstance(it.get("no"), int):
                 nos.append(it["no"])
 
+            shot = it.get("image")
+            if shot:
+                if Path(shot).name != shot:
+                    errors.append(f"{where_item}: image 只写文件名，不要带路径 —— 当前为 `{shot}`")
+                if Path(shot).suffix.lower() not in IMAGE_EXT:
+                    errors.append(f"{where_item}: image `{shot}` 扩展名不在 {'/'.join(sorted(IMAGE_EXT))} 内")
+                shot_path = REFS_DIR / data_key / shot
+                if not shot_path.exists():
+                    errors.append(f"{where_item}: 找不到参考图 assets/refs/{data_key}/{shot}")
+                else:
+                    kb = shot_path.stat().st_size / 1024
+                    if kb > IMAGE_MAX_KB:
+                        errors.append(
+                            f"{where_item}: 参考图 {shot} 有 {kb:.0f}KB，超过 {IMAGE_MAX_KB}KB 上限"
+                        )
+
+        # 反向检查：目录里有没有人没用到的图
+        refs_dir = REFS_DIR / data_key
+        if refs_dir.is_dir():
+            used_shots = {it.get("image") for it in items if it.get("image")}
+            for f in sorted(refs_dir.iterdir()):
+                if not f.is_file() or f.name.startswith("."):
+                    continue
+                if f.suffix.lower() not in IMAGE_EXT:
+                    continue
+                if f.name not in used_shots:
+                    errors.append(f"assets/refs/{data_key}/{f.name}: 没有条目引用这张图")
+
         if nos and sorted(nos) != list(range(1, len(nos) + 1)):
             errors.append(
                 f"data/{data_key}.js: no 字段应是 1..{len(nos)} 连续编号，"
@@ -437,7 +472,14 @@ def check_site(errors: list[str]) -> int:
         if key not in declared_keys:
             errors.append(f"data/{key}.js: 这个数据文件没有被任何子项目引用")
 
-    return sum(len(all_items.get(k, {}).get("items", [])) for k in declared_keys)
+    total = 0
+    with_shot = 0
+    for k in declared_keys:
+        for it in all_items.get(k, {}).get("items", []):
+            total += 1
+            if it.get("image"):
+                with_shot += 1
+    return total, with_shot
 
 
 # --------------------------------------------------------------------------- #
@@ -451,7 +493,7 @@ def main() -> int:
     errors: list[str] = []
     prompts = check_prompts(errors)
     skills = check_skills(errors)
-    site_items = check_site(errors)
+    site_items, site_shots = check_site(errors)
 
     write_index(PROMPTS_DIR / "README.md", render_prompt_index(prompts), args.check)
     write_index(SKILLS_DIR / "README.md", render_skill_index(skills), args.check)
@@ -465,7 +507,7 @@ def main() -> int:
 
     print(
         f"✓ 通过：{len(prompts)} 个 prompt 模板，{len(skills)} 个技能包，"
-        f"{site_items} 条站点内容"
+        f"{site_items} 条站点内容（其中 {site_shots} 条有参考图）"
     )
     return 0
 

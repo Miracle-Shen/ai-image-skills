@@ -169,7 +169,30 @@ window.AIS_ITEMS['<dataKey>'] = {
 | `group` | 必须出现在父子项目的 `groups` 数组里 |
 | `prompt` | **必须含 `[subject]` 占位符**（lint 会查） |
 | `keywords` | 非空数组，页面会渲染成标签 |
+| `image` | 参考图文件名（**只写文件名，不带路径**）。缺省时页面显示「参考图待补」占位块 |
 | `negative` / `tip` | 可选，但强烈建议都写 |
+
+### 参考图（图与 prompt 成组）
+
+**一张参考图配一个 prompt**，图片放在 `assets/refs/<子项目id>/`：
+
+```js
+{ id: 'ghibli', ..., image: 'ghibli.jpg' }   // → assets/refs/style-prompt/ghibli.jpg
+```
+
+| 项 | 要求 |
+| --- | --- |
+| 文件名 | 与条目 `id` 完全一致 |
+| 体积 | **≤ 500KB**（lint 硬校验） |
+| 格式 | `.jpg` 优先，也支持 `.png` / `.webp` / `.avif` |
+| 尺寸 | 长边 1200px 左右 |
+
+`lint` 会双向检查：写了 `image` 但文件不存在 → 报错；目录里有图没被引用 → 报错。
+
+页面表现：卡片顶部是参考图（点击放大），下方是标题，展开后才是 prompt。
+图与 prompt 在视觉上是同一张卡片的上下两半，构成一组。
+
+新增子项目时，项目级可以加 `imageCredit` 字段标注图片来源，会显示在标题下方。
 
 ### 数据文件为什么是 `.js` 不是 `.json`
 

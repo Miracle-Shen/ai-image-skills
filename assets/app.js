@@ -69,6 +69,45 @@
     }
   }
 
+  /* ---------- 参考图放大 ---------- */
+
+  var lightbox = null;
+
+  function ensureLightbox() {
+    if (lightbox) return lightbox;
+    lightbox = document.createElement('div');
+    lightbox.className = 'lightbox';
+    lightbox.innerHTML = '<div class="lightbox-inner">' +
+      '<img alt="">' +
+      '<div class="lightbox-bar"><span class="lightbox-cap"></span>' +
+      '<button class="lightbox-close" type="button">关闭 (Esc)</button></div>' +
+      '</div>';
+    document.body.appendChild(lightbox);
+
+    lightbox.addEventListener('click', function (e) {
+      if (e.target === lightbox || e.target.classList.contains('lightbox-close')) closeLightbox();
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') closeLightbox();
+    });
+    return lightbox;
+  }
+
+  function openLightbox(src, caption) {
+    var lb = ensureLightbox();
+    lb.querySelector('img').src = src;
+    lb.querySelector('img').alt = caption || '';
+    lb.querySelector('.lightbox-cap').textContent = caption || '';
+    lb.classList.add('is-open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeLightbox() {
+    if (!lightbox) return;
+    lightbox.classList.remove('is-open');
+    document.body.style.overflow = '';
+  }
+
   /* ---------- 首屏 ---------- */
 
   function projectCardHTML(p) {
@@ -132,13 +171,25 @@
 
   var state = { q: '', group: 'ALL' };
 
-  function styleCardHTML(it) {
+  function styleCardHTML(it, pid) {
     var kws = (it.keywords || []).map(function (k) {
       return '<span class="kw">' + esc(k) + '</span>';
     }).join('');
 
+    var shot = '';
+    if (it.image) {
+      var src = 'assets/refs/' + encodeURIComponent(pid) + '/' + encodeURIComponent(it.image);
+      shot = '<figure class="shot" data-zoom="' + esc(src) + '" title="点击放大">' +
+        '<img src="' + esc(src) + '" alt="' + esc(it.name) + ' 参考图" loading="lazy">' +
+        '<span class="zoom-hint">放大</span>' +
+        '</figure>';
+    } else {
+      shot = '<div class="shot is-missing"><span>参考图待补</span></div>';
+    }
+
     return '' +
       '<article class="style-card" data-id="' + esc(it.id) + '">' +
+        shot +
         '<div class="style-top" data-toggle>' +
           '<span class="style-no">' + String(it.no).padStart(2, '0') + '</span>' +
           '<div class="style-title">' +
@@ -183,6 +234,8 @@
     var groupCounts = {};
     items.forEach(function (it) { groupCounts[it.group] = (groupCounts[it.group] || 0) + 1; });
 
+    var withShot = items.filter(function (it) { return !!it.image; }).length;
+
     var groups = Object.keys(groupCounts);
     var filters = '<button class="filter is-active" data-group="ALL">全部' +
       '<span class="cnt">' + items.length + '</span></button>' +
@@ -199,9 +252,11 @@
         '<div class="stats">' +
           '<div class="stat"><b>' + items.length + '</b><span>' + esc(p.unit || '条') + '</span></div>' +
           '<div class="stat"><b>' + groups.length + '</b><span>个分组</span></div>' +
+          '<div class="stat"><b>' + withShot + '</b><span>张参考图</span></div>' +
         '</div>' +
       '</div>' +
       '<div class="notice"><b>用法</b> · ' + esc(bundle.note || '') + '</div>' +
+      (p.imageCredit ? '<div class="credit">' + esc(p.imageCredit) + '</div>' : '') +
       '<div class="toolbar">' +
         '<input class="search" type="search" placeholder="搜索风格名、关键词（如 赛博、watercolor、像素）…">' +
         '<div class="filters">' + filters + '</div>' +
@@ -222,7 +277,7 @@
         return hay.indexOf(q) !== -1;
       });
 
-      grid.innerHTML = list.map(styleCardHTML).join('');
+      grid.innerHTML = list.map(function (it) { return styleCardHTML(it, pid); }).join('');
       empty.hidden = list.length > 0;
       bindCards();
     }
@@ -247,6 +302,13 @@
             copyText(el ? el.textContent : '', btn);
           });
         });
+
+        var shot = card.querySelector('[data-zoom]');
+        if (shot) {
+          shot.addEventListener('click', function () {
+            openLightbox(shot.getAttribute('data-zoom'), card.querySelector('h3').textContent.trim());
+          });
+        }
       });
     }
 
