@@ -236,7 +236,10 @@
 
     var withShot = items.filter(function (it) { return !!it.image; }).length;
 
-    var groups = Object.keys(groupCounts);
+    // 筛选按钮顺序：优先按 projects.js 里登记的 groups 顺序，未登记的排后面
+    var declared = (p.groups || []).filter(function (g) { return groupCounts[g]; });
+    var extra = Object.keys(groupCounts).filter(function (g) { return declared.indexOf(g) < 0; });
+    var groups = declared.concat(extra);
     var filters = '<button class="filter is-active" data-group="ALL">全部' +
       '<span class="cnt">' + items.length + '</span></button>' +
       groups.map(function (g) {

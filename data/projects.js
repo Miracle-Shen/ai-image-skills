@@ -7,12 +7,23 @@ window.AIS_PROJECTS = [
     id: 'style-prompt',
     no: 1,
     name: 'AI 生图 · 风格 Prompt',
-    subtitle: '50 种绘画风格，每种一个可直接用的 Prompt',
-    desc: '按艺术风格组织的出图配方库。选风格 → 展开 Prompt → 复制 → 把 [subject] 换成你要画的东西。',
+    subtitle: '75 种风格，每种一张参考图 + 一个可直接用的 Prompt',
+    desc: '按艺术风格组织的出图配方库。图与 prompt 成组：卡片上半是参考图，展开是 Prompt。选风格 → 展开 → 复制 → 把 [subject] 换成你要画的东西。',
     unit: '种风格',
     status: 'ready',
-    groups: ['动画与插画', '传统绘画', '摄影与电影', '数字与未来', '3D 渲染与手工材质'],
+    groups: [
+      '绘画流派',
+      '东方美学',
+      '插画与动画',
+      '3D 与游戏美术',
+      '手工与材质',
+      '影像与生活方式',
+      '现代设计与平面',
+      '科幻与未来',
+      '暗黑与超现实'
+    ],
     dataKey: 'style-prompt',
+    imageCredit: '参考图来自原帖风格图谱（小红书 @柒晨来了），仅作风格对照使用',
     accent: '#e8613c'
   },
   {

@@ -1,431 +1,1066 @@
-/* 子项目 1：AI 生图 · 风格 Prompt
- * 50 种风格，5 个分组。
+/* 子项目 01：AI 生图 · 风格 Prompt
  *
- * 字段说明：
- *   id       唯一标识（英文小写中划线）
- *   name     中文名
- *   en       英文名（写 prompt 时用得到的那个）
- *   group    所属分组，必须与 projects.js 里的 groups 一致
- *   desc     一句话说清这种风格「看起来是什么样」
- *   keywords 关键词，会以标签形式展示，也可单独复制使用
- *   prompt   Prompt 正文。[subject] 是主体占位符，替换成你要画的内容
- *   negative 负面词（可选）
- *   tip      使用提示：容易翻车的点、和相邻风格的区别
+ * 内容来源：原帖风格图谱《AI绘图50种风格》的 15 张图 ×每张 5 条 = 75 条。
+ *   - 名称与说明：从原帖图谱左侧文字区逐条转录（详见 docs/ 与 git 记录）
+ *   - 参考图：图谱中每行右侧的示意图，由 tools/slice_atlas.py 自动切出
+ *   - prompt：按原帖描述的视觉特征重写成可直接投喂模型的英文关键词
+ *
+ * 图与 prompt 是一组：卡片上半是参考图，展开后是 prompt。
  */
 window.AIS_ITEMS = window.AIS_ITEMS || {};
 
 window.AIS_ITEMS['style-prompt'] = {
-  note: 'Prompt 里的 [subject] 是主体占位符。把它换成你要画的东西（英文效果更稳），例如 [subject] → a girl reading by a window。风格关键词放在后面不要动。',
+  note: '复制 prompt 后，只把 [subject] 换成你要画的东西 —— 后面的风格关键词不要动，它们是这个风格的识别特征。参考图是原帖图谱里该风格的示例。',
   items: [
-
-    /* ============ 动画与插画 ============ */
+    /* ---------- 01 日系手绘治愈动画风 ---------- */
     {
-      id: 'ghibli', no: 1, name: '吉卜力风格', en: 'Studio Ghibli', group: '动画与插画',
-      desc: '手绘赛璐璐、通透暖光、茂密绿植，日常里的温柔感',
-      keywords: ['studio ghibli style', 'hand-painted 2D animation', 'soft warm lighting', 'nostalgic atmosphere'],
-      prompt: '[subject], in the style of Studio Ghibli, hand-painted 2D animation cel, soft warm natural lighting, lush green foliage, gentle rounded character design, wholesome nostalgic atmosphere, delicate watercolor background, muted pastel palette, subtle film grain',
-      negative: 'photorealistic, 3d render, harsh shadows, distorted faces, text, watermark, oversaturated',
-      tip: '主体写成「日常场景 + 小动作」最稳，例如 a child running through a rice field at dusk。别写具体角色名，模型会画崩。'
+      id: 'japanese-healing-anime',
+      no: 1,
+      name: '日系手绘治愈动画风',
+      en: 'Japanese Healing Anime',
+      group: '插画与动画',
+      desc: '细腻手绘线条 + 柔和暖色调，自然场景里的温情日常',
+      keywords: ['hand-drawn linework', 'soft warm tones', 'pastoral nature', 'cosy storybook mood'],
+      prompt: '[subject], Japanese hand-drawn healing anime style, delicate hand-drawn linework, soft warm color palette, gentle pastoral scenery, forest meadow clouds and a small town, whimsical storybook atmosphere, cosy nostalgic lighting, flat cel shading, high detail, masterpiece',
+      negative: 'photorealistic, 3d render, harsh contrast, neon, gore, blurry, lowres',
+      tip: '和「宫崎骏风格」贴得很近。区分点：这条偏「治愈日常」，宫崎骏要出现飞行器、风、云团这些标志意象。想更萌加 cute, cosy。',
+      image: 'japanese-healing-anime.jpg'
     },
+    /* ---------- 02 后印象派厚涂油画风 ---------- */
     {
-      id: 'miyazaki', no: 2, name: '宫崎骏风格', en: 'Hayao Miyazaki', group: '动画与插画',
-      desc: '飞行器、风、浮空岛，奇幻冒险的广阔感',
-      keywords: ['hayao miyazaki inspired', 'whimsical fantasy', 'windswept motion', 'cel-shaded'],
-      prompt: '[subject], Hayao Miyazaki inspired illustration, whimsical fantasy world, flying machines and floating islands, rich hand-drawn detail, expressive windswept motion, warm golden sunlight, cel-shaded character with painterly background',
-      negative: 'photorealistic, 3d render, stiff pose, text, watermark',
-      tip: '注意：模型里「宫崎骏」和「吉卜力」高度重合。想区分，靠 flying machine / wind / adventure 这类意象词，而不是靠名字。'
+      id: 'post-impressionist-impasto',
+      no: 2,
+      name: '后印象派厚涂油画风',
+      en: 'Post-Impressionist Impasto Oil',
+      group: '绘画流派',
+      desc: '厚重油彩笔触 + 漩涡状纹理，用色彩强调情绪',
+      keywords: ['impasto', 'swirling brushwork', 'saturated colour', 'expressive motion'],
+      prompt: '[subject], Post-Impressionist impasto oil painting, thick visible brush strokes, swirling rhythmic texture, highly saturated colours, expressive dynamic linework, vivid emotion, natural scenery with living vitality, real canvas texture, museum oil painting',
+      negative: 'flat vector, cel shading, clean digital, photo, anime, thin lines',
+      tip: '不写 impasto / thick paint / palette knife 这些词，模型会给你平涂。和「梵高风格」的区别：这条不强调漩涡状天空。',
+      image: 'post-impressionist-impasto.jpg'
     },
+    /* ---------- 03 超现实主义风格 ---------- */
     {
-      id: 'shinkai', no: 3, name: '新海诚风格', en: 'Makoto Shinkai', group: '动画与插画',
-      desc: '高饱和天空、积雨云、光斑，清透又带点伤感',
-      keywords: ['makoto shinkai style', 'hyper-detailed anime scenery', 'dramatic sky', 'lens flare'],
-      prompt: '[subject], Makoto Shinkai style, hyper-detailed anime scenery, dramatic sky filled with cumulonimbus clouds, strong lens flare, saturated purple and teal gradient, glowing city lights at dusk, photorealistic anime background art, emotional and melancholic atmosphere',
-      negative: 'flat lighting, dull colors, rough sketch, text, watermark',
-      tip: '这种风格的灵魂是「天空」。主体可以小一点、占画面下部 1/3，把天空留给画面。'
+      id: 'surrealism',
+      no: 3,
+      name: '超现实主义风格',
+      en: 'Surrealism',
+      group: '绘画流派',
+      desc: '梦境意象、漂浮物体与扭曲空间并置，荒诞又细腻',
+      keywords: ['dreamlike', 'floating objects', 'impossible space', 'symbolic juxtaposition'],
+      prompt: '[subject], Surrealist oil painting, dreamlike imagery, floating objects, distorted impossible space, symbolic elements juxtaposed, uncanny yet hyper-detailed rendering, soft diffused light, Magritte influence, oil on canvas',
+      negative: 'ordinary snapshot, realistic proportions, flat illustration, cartoon, vector',
+      tip: '荒诞感来自「并置」，加上 juxtaposed / melting / disproportionate 才有。原帖图谱里这条出现过两次（第 2 张图第 05 条也是超现实），两版参考图可以对比取用。',
+      image: 'surrealism.jpg'
     },
+    /* ---------- 04 巴洛克风格 ---------- */
     {
-      id: 'pixar', no: 4, name: '皮克斯 3D', en: 'Pixar Style', group: '动画与插画',
-      desc: '圆润讨喜的 3D 角色、大眼睛、柔和次表面散射',
-      keywords: ['pixar style 3D', 'expressive character', 'subsurface scattering', 'cinematic studio lighting'],
-      prompt: '[subject], Pixar style 3D animation, expressive stylized character with large friendly eyes, soft subsurface scattering skin, vibrant colors, cinematic studio lighting, high quality render, cheerful heartwarming mood',
-      negative: 'flat 2d, sketch, uncanny realistic face, text, watermark',
-      tip: '想避免恐怖谷：明确写 stylized / caricature，不要让模型走写实人脸。'
+      id: 'baroque',
+      no: 4,
+      name: '巴洛克风格',
+      en: 'Baroque',
+      group: '绘画流派',
+      desc: '强明暗对比 + 戏剧化构图，华丽而庄严',
+      keywords: ['chiaroscuro', 'dramatic composition', 'ornate', 'epic grandeur'],
+      prompt: '[subject], Baroque painting, strong chiaroscuro light and shadow, dramatic theatrical composition, ornate decoration, gold and deep crimson palette, epic grandeur, dynamic movement, Caravaggio and Rubens influence, oil on canvas',
+      negative: 'minimalist, flat, pastel soft, modern minimal design, vector, plain',
+      tip: '巴洛克靠「强明暗 + 戏剧化」立住，chiaroscuro 和 dramatic 千万别删。和洛可可同属欧洲古典，一个沉重一个轻盈，容易搞反。',
+      image: 'baroque.jpg'
     },
+    /* ---------- 05 洛可可风格 ---------- */
     {
-      id: 'disney', no: 5, name: '迪士尼经典', en: 'Disney Classic', group: '动画与插画',
-      desc: '1950 年代手绘线条、圆润造型、水彩背景',
-      keywords: ['classic disney animation', 'hand-drawn line art', 'watercolor background', 'fairy tale'],
-      prompt: '[subject], classic Disney 1950s animation style, soft hand-drawn line art, rounded appealing shapes, watercolor background, warm nostalgic palette, storybook fairy-tale atmosphere',
-      negative: '3d render, modern cgi, harsh outlines, text, watermark',
-      tip: '加 1950s 或 classic 能把它和现代迪士尼 3D 分开；不加通常会出成 3D。'
+      id: 'rococo',
+      no: 5,
+      name: '洛可可风格',
+      en: 'Rococo',
+      group: '绘画流派',
+      desc: '粉、奶油、金三色，精致花纹与贵族沙龙气质',
+      keywords: ['pastel palette', 'cream and gold', 'delicate ornament', 'aristocratic romance'],
+      prompt: '[subject], Rococo style, airy pastel palette of pink cream and gold, delicate ornamental flourishes, soft diffused light, romantic elegant and sweet mood, aristocratic salon atmosphere, fine decorative detail, Fragonard influence, oil painting',
+      negative: 'dark, heavy shadow, monochrome, industrial, gritty, horror',
+      tip: '洛可可要「轻、甜、金」。负面词里的 dark / heavy 要留着，不然会被巴洛克味带跑。',
+      image: 'rococo.jpg'
     },
+    /* ---------- 06 国风／新中式 ---------- */
     {
-      id: 'dreamworks', no: 6, name: '梦工厂动画', en: 'DreamWorks', group: '动画与插画',
-      desc: '棱角分明的角色、夸张表情、动作感强',
-      keywords: ['dreamworks animation style', 'angular character design', 'exaggerated expression', 'dynamic pose'],
-      prompt: '[subject], DreamWorks animation style, sharp angular character design, bold exaggerated facial expression, cinematic lighting, dynamic action pose, rich textured detail',
-      negative: 'soft rounded cutesy style, flat lighting, text, watermark',
-      tip: '和皮克斯的区分点：皮克斯「圆」、梦工厂「方」。要棱角感就写 angular / sharp cheekbones。'
+      id: 'chinese-guofeng',
+      no: 6,
+      name: '国风／新中式',
+      en: 'Chinese Guofeng',
+      group: '东方美学',
+      desc: '国风总纲：水墨晕染 / 工笔细线 / 传统元素 + 现代设计',
+      keywords: ['ink wash', 'gongbi fine line', 'traditional motifs', 'modern Chinese design'],
+      prompt: '[subject], Chinese Guofeng illustration, ink wash bleeding combined with fine gongbi linework, traditional Chinese motifs, elegant negative space, modern graphic design sensibility, jade and vermilion accents, culturally refined',
+      negative: 'western fantasy, japanese anime, cyberpunk neon, photorealistic',
+      tip: '这条是「国风」的总纲（原帖标注了水墨／工笔／新国风三个方向）。要具体效果就下移到「水墨国风」「工笔国风」「新中式风格」三条。',
+      image: 'chinese-guofeng.jpg'
     },
+    /* ---------- 07 宫崎骏风格 ---------- */
     {
-      id: 'spiderverse', no: 7, name: '蜘蛛侠平行宇宙', en: 'Spider-Verse', group: '动画与插画',
-      desc: '漫画网点、色散、手绘抖动线条、街头涂鸦感',
-      keywords: ['spider-verse animation style', 'halftone dots', 'chromatic aberration', 'motion blur'],
-      prompt: '[subject], Spider-Verse animation style, comic-book halftone dots, chromatic aberration, bold graphic shapes, high-contrast neon colors, motion blur, mixed 2D and 3D look, graffiti energy',
-      negative: 'clean render, smooth gradients, muted colors, text, watermark',
-      tip: '这种风格「脏」才对。别加 clean / smooth，会把特征洗掉。'
+      id: 'miyazaki',
+      no: 7,
+      name: '宫崎骏风格',
+      en: 'Hayao Miyazaki Style',
+      group: '插画与动画',
+      desc: '手绘质感 + 浅黄淡绿柔粉，治愈系自然场景',
+      keywords: ['hand-drawn', 'soft warm tones', 'healing nature', 'gentle fantasy'],
+      prompt: '[subject], Hayao Miyazaki style anime, hand-drawn delicate linework, soft warm tones of pale yellow light green and soft pink, healing natural scenery of forest field and towering cumulus clouds, gentle human warmth, fairy-tale atmosphere, cel animation background art',
+      negative: '3d render, photorealistic, harsh neon, dark horror, mecha',
+      tip: '和「日系手绘治愈动画风」高度重合，靠飞行器、风、巨大云团这些意象区分。想要《千与千寻》那种氛围就加 quiet mystery。',
+      image: 'miyazaki.jpg'
     },
+    /* ---------- 08 莫兰迪风格 ---------- */
     {
-      id: 'retro-anime', no: 8, name: '90 年代复古动画', en: '90s Retro Anime', group: '动画与插画',
-      desc: '赛璐璐平涂、胶片颗粒、轻微褪色、VHS 质感',
-      keywords: ['1990s retro anime', 'cel animation', 'film grain', 'VHS aesthetic'],
-      prompt: '[subject], 1990s retro anime style, cel animation, visible film grain, slightly desaturated colors, hand-drawn line art, VHS tracking texture, nostalgic atmosphere',
-      negative: 'modern digital art, crisp vector lines, oversaturated, text, watermark',
-      tip: '加 VHS / scanline 会明显加强年代感；不加容易出成现代番剧。'
+      id: 'morandi',
+      no: 8,
+      name: '莫兰迪风格',
+      en: 'Morandi Palette',
+      group: '现代设计与平面',
+      desc: '灰粉灰蓝浅褐的低饱和灰调，静谧文艺',
+      keywords: ['desaturated grey tones', 'harmonious muted palette', 'quiet stillness'],
+      prompt: '[subject], Morandi colour palette, low saturation muted grey tones, dusty pink grey blue and pale brown, harmonious colours with no clash, soft flat light, quiet serene and gentle mood, minimalist composition, fine art still life feel',
+      negative: 'high saturation, neon, strong contrast, vivid primary colours, busy',
+      tip: '莫兰迪的本质是「降饱和」，不是「画成瓶子」。主体随便换，灰调关键词保持住就对了。',
+      image: 'morandi.jpg'
     },
+    /* ---------- 09 梵高风格 ---------- */
     {
-      id: 'manga', no: 9, name: '日式漫画', en: 'Manga', group: '动画与插画',
-      desc: '黑白网点、速度线、排线阴影，分镜感',
-      keywords: ['japanese manga style', 'black and white ink', 'screentone', 'speed lines'],
-      prompt: '[subject], Japanese manga style, black and white ink drawing, screentone shading, dynamic speed lines, expressive hatching, high contrast, comic panel composition',
-      negative: 'color, painted rendering, soft shading, text, watermark',
-      tip: '明确写 black and white，否则模型很爱自作主张上色。'
+      id: 'van-gogh',
+      no: 9,
+      name: '梵高风格',
+      en: 'Van Gogh Style',
+      group: '绘画流派',
+      desc: '厚涂笔触 + 漩涡状纹理，明黄钴蓝赭红',
+      keywords: ['impasto', 'swirling strokes', 'vivid yellow and cobalt', 'turbulent motion'],
+      prompt: '[subject], Vincent van Gogh style, thick impasto brushwork, bold swirling strokes, strong sense of motion, vivid saturated colours of bright yellow cobalt blue and ochre red, expressive turbulent sky, natural subject matter, post-impressionist oil on canvas',
+      negative: 'smooth gradient, flat vector, clean lines, minimal, photo',
+      tip: '漩涡笔触是梵高的签名，swirling 必须写。想要《星月夜》那种天空就补 turbulent night sky。',
+      image: 'van-gogh.jpg'
     },
+    /* ---------- 10 超现实主义 ---------- */
     {
-      id: 'comic', no: 10, name: '美式漫画', en: 'Comic Book', group: '动画与插画',
-      desc: '粗黑描边、平涂高饱和、网点阴影，超级英雄封面',
-      keywords: ['american comic book style', 'bold black outlines', 'flat vibrant colors', 'halftone shading'],
-      prompt: '[subject], American comic book style, bold black outlines, flat vibrant colors, halftone dot shading, dramatic low-angle composition, superhero cover art, dynamic energy',
-      negative: 'soft painting, watercolor, muted palette, text, watermark',
-      tip: '低角度仰视（low-angle）是美漫封面的默认视角，加上它画面立刻「有内味」。'
+      id: 'surrealism-dreamscape',
+      no: 10,
+      name: '超现实主义',
+      en: 'Surrealism (Dali strain)',
+      group: '绘画流派',
+      desc: '融化的钟、扭曲的人体，梦境逻辑压过现实',
+      keywords: ['melting clocks', 'distorted figures', 'dream logic', 'uncanny detail'],
+      prompt: '[subject], Surrealism, dream logic breaking reality, melting clocks and distorted human figures, dream imagery fused together, uncanny yet delicately rendered, soft shadowless light, Dali influence, oil on canvas',
+      negative: 'realistic, ordinary, flat cartoon, vector, photograph',
+      tip: '和上一条「超现实主义风格」是同一流派的两版参考图 —— 这条偏达利的融化／扭曲，第 3 条偏马格里特的漂浮并置。',
+      image: 'surrealism-dreamscape.jpg'
     },
+    /* ---------- 11 赛博朋克风格 ---------- */
     {
-      id: 'picture-book', no: 11, name: '儿童绘本', en: "Children's Book", group: '动画与插画',
-      desc: '柔和粉彩、水粉笔触、造型简单亲和',
-      keywords: ['children picture book illustration', 'soft pastel', 'gouache texture', 'simple friendly shapes'],
-      prompt: '[subject], children picture book illustration, soft pastel colors, simple friendly shapes, textured gouache brushwork, gentle lighting, whimsical and heartwarming mood',
-      negative: 'photorealistic, dark lighting, harsh detail, scary, text, watermark',
-      tip: '做儿童内容时负面词务必加 scary / dark / realistic eyes，否则容易出惊悚感。'
+      id: 'cyberpunk',
+      no: 11,
+      name: '赛博朋克风格',
+      en: 'Cyberpunk',
+      group: '科幻与未来',
+      desc: '霓虹撞黑灰暗部，雨夜街道与机械义体',
+      keywords: ['neon', 'high contrast', 'rainy night city', 'high tech low life'],
+      prompt: '[subject], cyberpunk style, highly saturated neon light against dark grey shadows, futuristic technology, ruined cityscape, rain-soaked night street, cybernetic implants, information overload, cold sci-fi mood, cinematic rim light, blade runner atmosphere',
+      negative: 'pastoral, warm daylight, vintage, hand-drawn, watercolour, medieval',
+      tip: '底色是「黑灰暗部 + 霓虹」。别把 negative 里的 daylight 去掉，否则会退化成普通的明亮未来都市。',
+      image: 'cyberpunk.jpg'
     },
+    /* ---------- 12 蒸汽朋克风格 ---------- */
     {
-      id: 'webtoon', no: 12, name: '韩系条漫', en: 'Korean Webtoon', group: '动画与插画',
-      desc: '干净数码线稿、渐变上色、发丝高光、柔和粉调',
-      keywords: ['korean webtoon style', 'clean digital line art', 'soft gradient shading', 'manhwa aesthetic'],
-      prompt: '[subject], Korean webtoon style, clean digital line art, soft gradient shading, glossy hair highlights, romantic pastel palette, vertical composition, manhwa aesthetic',
-      negative: 'rough sketch, heavy texture, muted colors, text, watermark',
-      tip: '韩漫的辨识点在「头发」和「皮肤渐变」。加 glossy hair highlights 效果好很多。'
+      id: 'steampunk',
+      no: 12,
+      name: '蒸汽朋克风格',
+      en: 'Steampunk',
+      group: '科幻与未来',
+      desc: '维多利亚工业美学，黄铜齿轮、管道与蒸汽',
+      keywords: ['victorian industrial', 'brass gears', 'pipes and steam', 'sepia bronze'],
+      prompt: '[subject], steampunk style, Victorian industrial aesthetic, brass and copper gears, exposed pipes and steam, pocket watches and airships, intricate mechanical detailing, warm sepia and bronze tones, retro-futuristic fantasy',
+      negative: 'modern glass skyscraper, neon cyberpunk, clean minimal, plastic',
+      tip: '要有「旧金属 + 维多利亚」。和赛博朋克的区别一句话：蒸汽朋克是黄铜，赛博朋克是霓虹。',
+      image: 'steampunk.jpg'
     },
-
-    /* ============ 传统绘画 ============ */
+    /* ---------- 13 水墨国风 ---------- */
     {
-      id: 'oil-painting', no: 13, name: '油画', en: 'Oil Painting', group: '传统绘画',
-      desc: '厚涂笔触、明暗对比强、颜料堆积的立体感',
-      keywords: ['classical oil painting', 'impasto brushstrokes', 'chiaroscuro', 'canvas texture'],
-      prompt: '[subject], classical oil painting, thick impasto brushstrokes, rich chiaroscuro lighting, deep saturated earth tones, visible canvas texture, old master technique, museum quality',
-      negative: 'digital art, flat colors, smooth gradient, photographic, text, watermark',
-      tip: '负面词里一定要写 digital / photographic，不然模型会给你一张「像油画的照片」。'
+      id: 'chinese-ink-wash',
+      no: 13,
+      name: '水墨国风',
+      en: 'Chinese Ink Wash',
+      group: '东方美学',
+      desc: '淡墨晕染、宣纸纹理、留白构图与山水意境',
+      keywords: ['ink wash', 'rice paper texture', 'negative space', 'shanshui'],
+      prompt: '[subject], Chinese ink wash painting, pale ink bleeding and diffusion, rice paper texture, generous negative space, shanshui mountain-and-water composition, flowing brush energy, poetic and lively, restrained monochrome with a single colour accent',
+      negative: 'oil painting, thick impasto, vivid saturated colour, 3d render, neon',
+      tip: '留白是灵魂，negative space / empty space 一定要写。想上一点色就写 subtle colour accent，别整成彩色。',
+      image: 'chinese-ink-wash.jpg'
     },
+    /* ---------- 14 工笔国风 ---------- */
     {
-      id: 'watercolor', no: 14, name: '水彩', en: 'Watercolor', group: '传统绘画',
-      desc: '透明水色、颜料自然晕开、留白通透',
-      keywords: ['watercolor painting', 'translucent washes', 'wet-on-wet', 'paper texture'],
-      prompt: '[subject], watercolor painting, translucent washes, blooming pigment edges, wet-on-wet technique, soft bleeding colors, white paper showing through, delicate ink outline',
-      negative: 'thick opaque paint, hard edges, digital gradient, text, watermark',
-      tip: '留白是水彩的命。加 white paper showing through 可避免模型把画面填满。'
+      id: 'chinese-gongbi',
+      no: 14,
+      name: '工笔国风',
+      en: 'Chinese Gongbi',
+      group: '东方美学',
+      desc: '线条工整细腻，色彩精致，仕女花鸟宫灯屏风',
+      keywords: ['fine linework', 'meticulous detail', 'court ladies and flowers', 'ornate'],
+      prompt: '[subject], Chinese gongbi fine-brush painting, meticulous even linework, refined gorgeous colouring, court ladies flowers birds palace lanterns and folding screens, elaborate decorative detail, elegant classical oriental temperament, silk ground',
+      negative: 'loose sketch, rough brushwork, impasto, grunge, low detail',
+      tip: '工笔靠「工整细线」立住，负面词里的 loose sketch 别删。它和水墨国风是国风的两端：一个精工，一个写意。',
+      image: 'chinese-gongbi.jpg'
     },
+    /* ---------- 15 新中式风格 ---------- */
     {
-      id: 'ink-wash', no: 15, name: '中国水墨', en: 'Chinese Ink Wash', group: '传统绘画',
-      desc: '墨色浓淡、笔意流动、大量留白',
-      keywords: ['traditional chinese ink painting', 'brush strokes', 'negative space', 'rice paper'],
-      prompt: '[subject], traditional Chinese ink wash painting, flowing brush strokes, varying ink density from deep black to pale grey, generous negative space, rice paper texture, minimalist composition, subtle color accents',
-      negative: 'photorealistic, heavy saturation, dense detail, western oil painting, text, watermark',
-      tip: '水墨最怕「画满」。强制写 generous negative space / minimalist，并且主体只占画面 1/3。'
+      id: 'modern-chinese',
+      no: 15,
+      name: '新中式风格',
+      en: 'Modern Chinese',
+      group: '东方美学',
+      desc: '传统元素 + 现代设计语言，简洁高级',
+      keywords: ['modern Chinese design', 'ink motif', 'window lattice', 'gold line accents'],
+      prompt: '[subject], modern Chinese design style, traditional Chinese elements merged with contemporary design language, clean and elevated composition, ink motifs, window lattice, folding screen silhouettes, mountain shapes, fine gold line accents, restrained palette',
+      negative: 'ornate classical, baroque, heavy traditional pattern, kitsch',
+      tip: '比「国风／新中式」更偏设计感、更简洁。做海报、KV、包装就用它。',
+      image: 'modern-chinese.jpg'
     },
+    /* ---------- 16 印象派风格 ---------- */
     {
-      id: 'gongbi', no: 16, name: '工笔重彩', en: 'Gongbi', group: '传统绘画',
-      desc: '极细勾线、层层矿物颜料、华丽精致',
-      keywords: ['chinese gongbi painting', 'fine meticulous brushwork', 'mineral pigments', 'silk texture'],
-      prompt: '[subject], Chinese Gongbi painting, fine meticulous brushwork, delicate even outlines, layered mineral pigments, rich vermilion red and gold, silk canvas texture, ornate traditional detail',
-      negative: 'loose sketchy strokes, watercolor wash, muted palette, text, watermark',
-      tip: '工笔和写意的区别就在线条：一定要写 fine meticulous / even outlines，否则会跑成写意。'
+      id: 'impressionism',
+      no: 16,
+      name: '印象派风格',
+      en: 'Impressionism',
+      group: '绘画流派',
+      desc: '松散笔触捕捉自然光影，弱化轮廓细节',
+      keywords: ['loose brushwork', 'natural light', 'plein air', 'atmospheric haze'],
+      prompt: '[subject], Impressionist oil painting, loose visible brushwork, natural daylight and fleeting colour sensation, softened contours, emphasis on atmosphere and light, plein air outdoor scene, Monet and Renoir influence, dappled sun',
+      negative: 'sharp outline, hard edge, photorealistic, flat vector, neon',
+      tip: '印象派的关键是「弱化轮廓」，负面词里写 sharp outline 特别管用。',
+      image: 'impressionism.jpg'
     },
+    /* ---------- 17 表现主义风格 ---------- */
     {
-      id: 'charcoal', no: 17, name: '炭笔素描', en: 'Charcoal Sketch', group: '传统绘画',
-      desc: '黑白灰层次、擦揉质感、粗纸颗粒',
-      keywords: ['charcoal drawing', 'smudged shading', 'value contrast', 'paper grain'],
-      prompt: '[subject], charcoal drawing on textured paper, smudged graphite shading, dramatic value contrast, expressive loose strokes, monochrome, rough paper grain',
-      negative: 'color, digital smooth shading, vector lines, text, watermark',
-      tip: '注意 charcoal（炭笔）和 graphite（铅笔）质感不同。要更黑更粗就写 vine charcoal。'
+      id: 'expressionism',
+      no: 17,
+      name: '表现主义风格',
+      en: 'Expressionism',
+      group: '绘画流派',
+      desc: '夸张色彩与变形线条，把内心情绪推到前面',
+      keywords: ['exaggerated colour', 'distorted line', 'raw emotion', 'skewed perspective'],
+      prompt: '[subject], Expressionist painting, exaggerated colours, distorted deformed lines, raw intense emotion, oppressive anxious or explosive mood, bold gestural strokes, skewed perspective, Munch and Kirchner influence, oil on canvas',
+      negative: 'pretty, cute, gentle, harmonious pastel, photorealistic',
+      tip: '要压迫感就保留 oppressive / anxious。想柔和一点反而会掉成普通的半抽象画。',
+      image: 'expressionism.jpg'
     },
+    /* ---------- 18 极简主义风格 ---------- */
     {
-      id: 'colored-pencil', no: 18, name: '彩色铅笔', en: 'Colored Pencil', group: '传统绘画',
-      desc: '细密交叉排线、笔触可见、纸纹明显',
-      keywords: ['colored pencil illustration', 'cross-hatching', 'visible pencil strokes', 'paper tooth'],
-      prompt: '[subject], colored pencil illustration, fine cross-hatching, visible pencil strokes, layered vibrant colors, paper tooth texture, hand-drawn warmth, detailed shading',
-      negative: 'smooth digital painting, airbrush, thick paint, text, watermark',
-      tip: '交叉排线是识别特征。加 cross-hatching 能明显提升「铅笔味」，不加会变成普通彩绘。'
+      id: 'minimalism',
+      no: 18,
+      name: '极简主义风格',
+      en: 'Minimalism',
+      group: '现代设计与平面',
+      desc: '少量元素 + 大面积留白，干净理性的高级感',
+      keywords: ['minimal composition', 'negative space', 'restrained palette', 'single focal point'],
+      prompt: '[subject], minimalist composition, few elements, large areas of negative space, restrained limited palette, one single clear focal subject, clean and refined, rational high-end visual, soft even light, subtle texture',
+      negative: 'busy, cluttered, ornate, high detail, many objects',
+      tip: '极简最常翻车成「像没画完」。加 one clear focal subject 和 subtle texture 提质感。',
+      image: 'minimalism.jpg'
     },
+    /* ---------- 19 波普艺术风格 ---------- */
     {
-      id: 'ukiyoe', no: 19, name: '浮世绘', en: 'Ukiyo-e', group: '传统绘画',
-      desc: '平涂色块、粗黑轮廓、波浪纹样、江户气质',
-      keywords: ['japanese ukiyo-e', 'woodblock print', 'flat color areas', 'bold outlines'],
-      prompt: '[subject], Japanese Ukiyo-e woodblock print, flat areas of color, bold black outlines, stylized wave patterns, Hokusai inspired, muted indigo and vermilion palette, Edo period aesthetic, visible woodblock grain',
-      negative: '3d shading, photorealistic, soft gradients, digital painting, text, watermark',
-      tip: '「平涂 + 无渐变」是关键。负面词加 soft gradients 防止模型自作主张加立体感。'
+      id: 'pop-art',
+      no: 19,
+      name: '波普艺术风格',
+      en: 'Pop Art',
+      group: '现代设计与平面',
+      desc: '高饱和撞色 + 漫画线条 + 网点纹理',
+      keywords: ['saturated clash colours', 'comic outline', 'halftone dots', 'screen print'],
+      prompt: '[subject], Pop Art style, high saturation clashing colours, comic-book linework, halftone dot texture, mass consumer symbols, bold graphic impact, Warhol and Lichtenstein influence, screen print feel',
+      negative: 'muted, pastel, soft gradient, realistic texture, oil painting brushwork',
+      tip: '识别点是网点加黑描边，halftone 和 bold outline 两个都写上。',
+      image: 'pop-art.jpg'
     },
+    /* ---------- 20 扁平插画风 ---------- */
     {
-      id: 'impressionism', no: 20, name: '印象派', en: 'Impressionism', group: '传统绘画',
-      desc: '碎笔触、重光色氛围、边缘模糊',
-      keywords: ['impressionist oil painting', 'broken brushstrokes', 'light and atmosphere', 'plein air'],
-      prompt: '[subject], Impressionist oil painting, broken dappled brushstrokes, emphasis on light and atmosphere over detail, soft blurred edges, pastel palette, Monet inspired, plein air feeling',
-      negative: 'sharp outlines, hyperdetailed, black outlines, digital art, text, watermark',
-      tip: '印象派要「糊」。负面词写 sharp outlines / crisp detail，越清晰越不对。'
+      id: 'flat-illustration',
+      no: 20,
+      name: '扁平插画风',
+      en: 'Flat Illustration',
+      group: '现代设计与平面',
+      desc: '去光影去透视，块面色彩 + 清晰造型',
+      keywords: ['flat shapes', 'no gradient', 'clear silhouette', 'editorial'],
+      prompt: '[subject], flat vector illustration, no complex shading or realistic perspective, simple clean lines, solid block colour, clear silhouette, confident shapes, editorial infographic style, brand-friendly, neat composition',
+      negative: 'realistic lighting, gradient mesh, 3d render, texture, oil paint',
+      tip: '扁平不等于简陋。加 clear silhouette 和 confident shapes 才有高级感。信息图、品牌插画、新媒体配图都合适。',
+      image: 'flat-illustration.jpg'
     },
+    /* ---------- 21 厚涂插画风 ---------- */
     {
-      id: 'post-impressionism', no: 21, name: '后印象派', en: 'Post-Impressionism', group: '传统绘画',
-      desc: '旋转笔触、大胆非写实配色、厚涂',
-      keywords: ['post-impressionist painting', 'swirling brushstrokes', 'expressive colors', 'van gogh inspired'],
-      prompt: '[subject], Post-Impressionist painting, bold swirling brushstrokes, expressive unnatural colors, thick paint texture, Van Gogh inspired, dynamic rhythmic composition, glowing yellow and deep blue',
-      negative: 'flat vector, smooth digital gradient, photorealistic, text, watermark',
-      tip: '梵高感的两个必备词：swirling brushstrokes + thick paint。缺一个都会「不够梵高」。'
+      id: 'thick-paint-illustration',
+      no: 21,
+      name: '厚涂插画风',
+      en: 'Thick Paint Illustration',
+      group: '插画与动画',
+      desc: '笔触厚重，人物场景有强体积感与绘画质感',
+      keywords: ['thick strokes', 'layered colour', 'sculptural volume', 'painterly'],
+      prompt: '[subject], thick-paint digital illustration, heavy brush strokes, rich layered colour, strong sculptural volume, painterly rendering, character design and concept art quality, dramatic value contrast, fantasy friendly',
+      negative: 'flat colour, vector, line art only, minimalist, photo',
+      tip: '厚涂要「体积感」，volume / sculpted form 写上。角色设定和概念设计的主力风格。',
+      image: 'thick-paint-illustration.jpg'
     },
+    /* ---------- 22 电影写实风 ---------- */
     {
-      id: 'surrealism', no: 22, name: '超现实主义', en: 'Surrealism', group: '传统绘画',
-      desc: '梦境逻辑、不可能的场景、写实手法画荒诞内容',
-      keywords: ['surrealist painting', 'dreamlike scene', 'impossible objects', 'dali inspired'],
-      prompt: '[subject], surrealist painting, dreamlike impossible scene, melting and distorted objects, floating elements, hyperreal rendering of unreal content, Dali inspired, vast empty sky, unsettling calm',
-      negative: 'ordinary realistic scene, cluttered detail, cartoon, text, watermark',
-      tip: '超现实的力量来自「画得很真、但内容不可能」。所以既要 hyperreal 又要 impossible，两个都要写。'
+      id: 'cinematic-realism',
+      no: 22,
+      name: '电影写实风',
+      en: 'Cinematic Realism',
+      group: '影像与生活方式',
+      desc: '电影级光影 + 镜头语言，剧照般的真实质感',
+      keywords: ['film still', 'cinematic lighting', 'natural colour', 'lens language'],
+      prompt: '[subject], cinematic realism, true photographic texture, film-grade lighting, natural colour grading, anamorphic lens language, shallow depth of field, movie still composition, subtle film grain, 35mm',
+      negative: 'cartoon, anime, vector, flat illustration, oversaturated plastic skin',
+      tip: '想要剧照感就加 movie still / 35mm。别加 3d render，会往 CG 跑。',
+      image: 'cinematic-realism.jpg'
     },
+    /* ---------- 23 商业摄影风 ---------- */
     {
-      id: 'art-nouveau', no: 23, name: '新艺术运动', en: 'Art Nouveau', group: '传统绘画',
-      desc: '藤蔓曲线、华丽边框、穆夏式装饰海报',
-      keywords: ['art nouveau illustration', 'ornate decorative border', 'alphonse mucha style', 'flowing lines'],
-      prompt: '[subject], Art Nouveau illustration, ornate decorative border, flowing organic vine lines, Alphonse Mucha style, muted gold and sage palette, elegant flat color, vintage poster composition',
-      negative: 'harsh geometric shapes, brutalist, neon colors, text, watermark',
-      tip: '边框是这个风格的招牌。写 ornate decorative border 会自动帮你在画面四周加装饰框。'
+      id: 'commercial-photography',
+      no: 23,
+      name: '商业摄影风',
+      en: 'Commercial Photography',
+      group: '影像与生活方式',
+      desc: '布光精细、背景干净、主体突出',
+      keywords: ['studio lighting', 'clean background', 'hero shot', 'controlled reflection'],
+      prompt: '[subject], high-end commercial photography, meticulous studio lighting, clean seamless background, hero subject focus, crisp detail, controlled reflections, advertising campaign quality, brand key visual',
+      negative: 'cluttered background, snapshot, casual, heavy film grain, cartoon',
+      tip: '主体不一定是产品，人像、食物也行，但「布光精细 + 背景干净」这两点别丢。',
+      image: 'commercial-photography.jpg'
     },
+    /* ---------- 24 未来主义风格 ---------- */
     {
-      id: 'pop-art', no: 24, name: '波普艺术', en: 'Pop Art', group: '传统绘画',
-      desc: '高饱和平涂、粗黑边、网点、丝网印刷感',
-      keywords: ['pop art', 'andy warhol inspired', 'bold flat primary colors', 'halftone dots'],
-      prompt: '[subject], Pop Art, Andy Warhol inspired, bold flat primary colors, thick black outlines, halftone dots, high saturation, repeated grid motif, silk-screen print look',
-      negative: 'realistic shading, muted colors, subtle gradient, text, watermark',
-      tip: '想要那种四宫格重复效果，就写 repeated 2x2 grid of the same subject with different color schemes。'
+      id: 'futurism',
+      no: 24,
+      name: '未来主义风格',
+      en: 'Futurism',
+      group: '科幻与未来',
+      desc: '流线结构 + 科技材质 + 发光界面，理性高速',
+      keywords: ['streamlined forms', 'tech materials', 'glowing interface', 'high speed'],
+      prompt: '[subject], futuristic design style, streamlined aerodynamic structure, advanced tech materials, glowing glass interface, sense of high speed, cold rational intelligent visual, smart surface light, forward-looking composition',
+      negative: 'vintage, rusty, medieval, hand-drawn, warm cosy',
+      tip: '和赛博朋克的区别：这条是「干净明亮的未来」，没有废墟、没有雨夜。',
+      image: 'futurism.jpg'
     },
-
-    /* ============ 摄影与电影 ============ */
+    /* ---------- 25 侘寂风格 ---------- */
     {
-      id: 'cinematic', no: 25, name: '电影感', en: 'Cinematic', group: '摄影与电影',
-      desc: '宽银幕、浅景深、冷暖对冲的调色',
-      keywords: ['cinematic film still', 'anamorphic lens', 'teal and orange', 'shallow depth of field'],
-      prompt: '[subject], cinematic film still, anamorphic lens, shallow depth of field, dramatic rim lighting, teal and orange color grading, 35mm film, movie poster quality, atmospheric haze',
-      negative: 'flat lighting, snapshot, amateur photo, text, watermark',
-      tip: '「青橙调」是最省事的电影感开关。teal and orange 两个词就够，不用堆更多。'
+      id: 'wabi-sabi',
+      no: 25,
+      name: '侘寂风格',
+      en: 'Wabi-Sabi',
+      group: '影像与生活方式',
+      desc: '自然旧化 + 残缺之美，粗糙材质与低饱和',
+      keywords: ['weathered texture', 'imperfect beauty', 'muted earth tones', 'zen stillness'],
+      prompt: '[subject], wabi-sabi aesthetic, weathered natural ageing, beauty of imperfection, coarse raw material texture, crack and patina, low saturation earth palette, quiet plain restrained, zen mindful stillness, soft window light, slow living',
+      negative: 'glossy, brand new, plastic, neon, maximalist, polished',
+      tip: '侘寂靠「粗糙 + 旧化」。加上 crack, patina, raw clay 这类材质词，否则会画得太新。',
+      image: 'wabi-sabi.jpg'
     },
+    /* ---------- 26 日式极简风 ---------- */
     {
-      id: 'wes-anderson', no: 26, name: '韦斯·安德森', en: 'Wes Anderson', group: '摄影与电影',
-      desc: '绝对对称、正面平视、粉彩色板、冷幽默',
-      keywords: ['wes anderson style', 'symmetrical composition', 'pastel palette', 'deadpan'],
-      prompt: '[subject], Wes Anderson style, perfectly symmetrical composition, flat frontal framing, pastel color palette, whimsical production design, centered subject, deadpan mood',
-      negative: 'asymmetric composition, dutch angle, gritty realism, harsh colors, text, watermark',
-      tip: '对称是硬要求。负面词一定加 asymmetric，模型手很痒总想搞倾斜构图。'
+      id: 'japanese-minimal',
+      no: 26,
+      name: '日式极简风',
+      en: 'Japanese Minimalism',
+      group: '影像与生活方式',
+      desc: '留白 + 自然材质 + 低饱和，安静有秩序',
+      keywords: ['negative space', 'natural material', 'quiet order', 'soft daylight'],
+      prompt: '[subject], Japanese minimalist aesthetic, generous empty space, low saturation natural palette, natural material textures of wood paper and linen, simple balanced composition, quiet orderly calm, lifestyle and interior editorial, soft daylight',
+      negative: 'busy, colourful, ornate, glossy plastic, high contrast',
+      tip: '和「极简主义风格」的区别：这条必须有自然材质（木／纸／麻），后者是通用平面极简。',
+      image: 'japanese-minimal.jpg'
     },
+    /* ---------- 27 韩系清新风 ---------- */
     {
-      id: 'bw-photo', no: 27, name: '黑白摄影', en: 'B&W Photography', group: '摄影与电影',
-      desc: '极致黑白对比、粗颗粒、侧光塑造',
-      keywords: ['black and white photograph', 'high contrast', 'film grain', 'side lighting'],
-      prompt: '[subject], black and white photograph, high contrast, deep blacks and bright highlights, sharp film grain, dramatic side lighting, timeless documentary feel',
-      negative: 'color, HDR, flat lighting, digital smoothness, text, watermark',
-      tip: '写 color 进负面词很关键 —— 模型对「黑白」的理解经常只是在画面上盖一层灰。'
+      id: 'korean-fresh',
+      no: 27,
+      name: '韩系清新风',
+      en: 'Korean Fresh Style',
+      group: '影像与生活方式',
+      desc: '明亮自然光 + 柔和肤色 + 干净背景',
+      keywords: ['bright natural light', 'soft skin', 'low saturation', 'airy pastel'],
+      prompt: '[subject], Korean fresh lifestyle aesthetic, bright natural light, soft luminous skin, low saturation styling, clean uncluttered background, airy pastel palette, gentle warm mood, candid lifestyle feel, soft overexposed light',
+      negative: 'heavy makeup, dark moody, high contrast, grunge, neon',
+      tip: '关键词就两个：亮、干净。加 overexposed soft light 立刻出韩系感。',
+      image: 'korean-fresh.jpg'
     },
+    /* ---------- 28 法式复古风 ---------- */
     {
-      id: 'film-kodak', no: 28, name: '胶片质感', en: 'Kodak Film', group: '摄影与电影',
-      desc: '柯达暖调、细腻颗粒、高光柔化溢出',
-      keywords: ['kodak portra 400', 'warm golden tones', 'film grain', 'halation'],
-      prompt: '[subject], Kodak Portra 400 film photograph, warm golden tones, fine film grain, soft halation around highlights, slight light leak, nostalgic analog color, natural skin tones',
-      negative: 'digital look, HDR, oversharpened, cold tones, text, watermark',
-      tip: 'halation（高光溢出）是胶片感的隐藏开关，比单纯加 grain 有效得多。'
+      id: 'french-vintage',
+      no: 28,
+      name: '法式复古风',
+      en: 'French Vintage',
+      group: '影像与生活方式',
+      desc: '暖调胶片 + 街边咖啡馆 + 老建筑，慵懒文艺',
+      keywords: ['warm film tone', 'café', 'old architecture', 'effortless elegance'],
+      prompt: '[subject], French vintage aesthetic, elegant styling, warm film colour tone, sidewalk café and old architecture, relaxed unposed attitude, romantic languid mood, soft 35mm film grain, golden hour',
+      negative: 'neon, futuristic, sporty, harsh flash, plastic',
+      tip: '暖调胶片 + 老建筑是骨架。再补 golden hour 和 film grain 就稳了。',
+      image: 'french-vintage.jpg'
     },
+    /* ---------- 29 美式复古风 ---------- */
     {
-      id: 'macro', no: 29, name: '微距摄影', en: 'Macro Photography', group: '摄影与电影',
-      desc: '极浅景深、超高细节、水珠与纹理',
-      keywords: ['extreme macro photography', 'shallow depth of field', 'ultra fine detail', 'bokeh'],
-      prompt: '[subject], extreme macro photography, shallow depth of field, ultra fine detail, water droplets, soft bokeh background, studio lighting, 100mm macro lens',
-      negative: 'wide shot, deep focus, cluttered background, blurry subject, text, watermark',
-      tip: '主体必须是「小东西」。如果你写 a person，模型会给你一张奇怪的大特写。'
+      id: 'american-vintage',
+      no: 29,
+      name: '美式复古风',
+      en: 'American Vintage',
+      group: '影像与生活方式',
+      desc: '高对比色彩 + 老式汽车 + 霓虹招牌 + 公路',
+      keywords: ['high contrast', 'classic cars', 'neon signage', 'open highway'],
+      prompt: '[subject], American vintage aesthetic, high contrast colours, classic cars, neon signage, open highway, denim and chrome details, 1970s film texture, nostalgic and bold',
+      negative: 'minimal, pastel soft, futuristic, airy, muted',
+      tip: '和法式复古的分工：美式是高对比、公路、霓虹牌；法式是柔和、咖啡馆、老建筑。',
+      image: 'american-vintage.jpg'
     },
+    /* ---------- 30 洛杉矶阳光风 ---------- */
     {
-      id: 'long-exposure', no: 30, name: '长曝光', en: 'Long Exposure', group: '摄影与电影',
-      desc: '丝滑运动拖影、光轨、水面如雾',
-      keywords: ['long exposure photography', 'motion blur', 'light trails', 'ND filter'],
-      prompt: '[subject], long exposure photography, silky smooth motion blur, glowing light trails, dreamy flowing water like mist, tripod stability, ND filter, ethereal atmosphere',
-      negative: 'frozen motion, harsh flash, cluttered detail, text, watermark',
-      tip: '长曝光需要「动的东西」才成立 —— 水、车流、云、人流。静止主体配它会显得很空。'
+      id: 'la-sunshine',
+      no: 30,
+      name: '洛杉矶阳光风',
+      en: 'LA Sunshine',
+      group: '影像与生活方式',
+      desc: '强烈阳光 + 棕榈树 + 海岸公路 + 暖橙色调',
+      keywords: ['harsh sunlight', 'palm trees', 'coastal highway', 'warm orange'],
+      prompt: '[subject], Los Angeles sunshine aesthetic, strong direct sunlight, palm trees, coastal highway, vintage convertible, warm orange and teal palette, bright youthful west coast vibe, golden haze, 35mm film',
+      negative: 'gloomy, rainy, winter, indoor studio, muted grey',
+      tip: '橙青互补色（orange and teal）是这条的隐形配方，加上就对了。',
+      image: 'la-sunshine.jpg'
     },
+    /* ---------- 31 暗黑哥特风 ---------- */
     {
-      id: 'double-exposure', no: 31, name: '双重曝光', en: 'Double Exposure', group: '摄影与电影',
-      desc: '两层半透明叠合、人影与风景互融',
-      keywords: ['double exposure photograph', 'translucent layers', 'ghostly blend', 'high contrast'],
-      prompt: '[subject], double exposure photograph, overlapping translucent layers, ghostly blend of figure and landscape, high contrast, artistic composite, moody monochrome with one accent color',
-      negative: 'single flat subject, cluttered layers, muddy overlap, text, watermark',
-      tip: '这种风格靠「两层」成立：写清哪两层（人物 + 风景 / 建筑 + 树）。只写一层模型不会叠。'
+      id: 'dark-gothic',
+      no: 31,
+      name: '暗黑哥特风',
+      en: 'Dark Gothic',
+      group: '暗黑与超现实',
+      desc: '黑、深红、冷灰，尖顶建筑与烛光玫瑰',
+      keywords: ['black and deep red', 'spires', 'candlelight', 'roses'],
+      prompt: '[subject], dark gothic style, palette of black deep red and cool grey, gothic spires and cathedral arches, stained glass, candlelight, roses, crosses, mysterious figures, moody chiaroscuro, ornate yet somber, mysterious and opulent',
+      negative: 'bright, cheerful, pastel, sunny, cute, minimal',
+      tip: '哥特 = 建筑元素 + 阴郁配色，加 stained glass 和 candlelight 更到位。和暗黑奇幻的区别：哥特不一定要有怪物。',
+      image: 'dark-gothic.jpg'
     },
+    /* ---------- 32 废土末日风 ---------- */
     {
-      id: 'cyanotype', no: 32, name: '蓝晒', en: 'Cyanotype', group: '摄影与电影',
-      desc: '普鲁士蓝、白线剪影、手涂纸边',
-      keywords: ['cyanotype print', 'prussian blue', 'sun printing', 'antique process'],
-      prompt: '[subject], cyanotype blueprint print, deep Prussian blue and white only, sun-printed botanical texture, visible paper fibers, hand-coated rough edges, antique photographic process',
-      negative: 'full color, digital photo, glossy finish, modern look, text, watermark',
-      tip: '颜色锁死在「蓝 + 白」两色。负面词写 full color，否则模型会忍不住补色。'
+      id: 'wasteland',
+      no: 32,
+      name: '废土末日风',
+      en: 'Wasteland',
+      group: '科幻与未来',
+      desc: '荒漠废墟、锈蚀金属、破损建筑与低饱和',
+      keywords: ['ruins', 'rusted metal', 'desaturated', 'survival'],
+      prompt: '[subject], post-apocalyptic wasteland, desolate desert ruins, rusted corroded metal, broken concrete buildings, dust and debris, low saturation dusty palette, sandstorm haze, harsh sun, mood of survival and danger, cinematic wide shot',
+      negative: 'lush green, clean futuristic, cosy, cute, colourful garden',
+      tip: '废土要脏 —— 加 dust, rust, debris。正面词里别留 clean / polished，会打架。',
+      image: 'wasteland.jpg'
     },
+    /* ---------- 33 太空歌剧风 ---------- */
     {
-      id: 'tilt-shift', no: 33, name: '移轴', en: 'Tilt-Shift', group: '摄影与电影',
-      desc: '微缩模型感、上下重度虚化、俯视',
-      keywords: ['tilt-shift photography', 'miniature effect', 'selective focus', 'top-down view'],
-      prompt: '[subject], tilt-shift photography, miniature model effect, narrow selective focus band, heavily blurred foreground and background, saturated colors, elevated top-down view, toy-like scale',
-      negative: 'deep focus, eye-level shot, desaturated, text, watermark',
-      tip: '必须配俯视角度（elevated / top-down）才像微缩模型。平视加移轴只会像跑焦。'
+      id: 'space-opera',
+      no: 33,
+      name: '太空歌剧风',
+      en: 'Space Opera',
+      group: '科幻与未来',
+      desc: '星舰、外星文明、宏大战争与史诗叙事',
+      keywords: ['starships', 'vast scale', 'alien civilisation', 'epic'],
+      prompt: '[subject], space opera, capital starships, deep space vistas, alien civilisations, grand interstellar war, epic scale and narrative, majestic awe-inspiring mood, dramatic volumetric light, sci-fi concept art',
+      negative: 'small intimate, mundane, rural, cute cartoon, low scale',
+      tip: '太空歌剧的关键是「大」，写 epic scale / massive / vast。想要《星球大战》那种旧科技感就加 used-future grime。',
+      image: 'space-opera.jpg'
     },
-
-    /* ============ 数字与未来 ============ */
+    /* ---------- 34 Y2K 风格 ---------- */
     {
-      id: 'cyberpunk', no: 34, name: '赛博朋克', en: 'Cyberpunk', group: '数字与未来',
-      desc: '霓虹雨夜、全息招牌、品红与青、高科技低生活',
-      keywords: ['cyberpunk', 'neon rainy street', 'holographic signage', 'magenta and cyan'],
-      prompt: '[subject], cyberpunk, neon-drenched rainy street, holographic signage, chrome and glass, magenta and cyan lighting, volumetric fog, high tech low life, blade runner atmosphere',
-      negative: 'daylight, pastoral, rustic, warm natural light, text, watermark',
-      tip: '两个开关：rainy（湿地面反光）+ neon。干燥的赛博朋克看起来就是普通科幻。'
+      id: 'y2k',
+      no: 34,
+      name: 'Y2K 风格',
+      en: 'Y2K',
+      group: '现代设计与平面',
+      desc: '金属银、果冻质感、镭射渐变与像素元素',
+      keywords: ['metallic silver', 'jelly texture', 'laser gradient', 'pixel elements'],
+      prompt: '[subject], Y2K aesthetic, millennium internet visual culture, metallic silver and chrome, jelly translucent texture, laser holographic gradient, pixel elements, futuristic retro optimism, glossy digital layout, lens flare',
+      negative: 'matte, muted, vintage film, hand-drawn, rustic, natural',
+      tip: '高光金属 + 镭射渐变是识别点。补 glossy plastic 和 lens flare 更狠。',
+      image: 'y2k.jpg'
     },
+    /* ---------- 35 孟菲斯风格 ---------- */
     {
-      id: 'steampunk', no: 35, name: '蒸汽朋克', en: 'Steampunk', group: '数字与未来',
-      desc: '黄铜齿轮、维多利亚服饰、蒸汽与仪表',
-      keywords: ['steampunk', 'brass gears', 'victorian', 'steam and gauges'],
-      prompt: '[subject], steampunk, brass gears and copper pipes, Victorian era clothing, steam vents and pressure gauges, warm amber lighting, intricate clockwork detail, sepia and bronze palette',
-      negative: 'modern materials, plastic, neon, futuristic chrome, text, watermark',
-      tip: '和柴油朋克的区分：蒸汽朋克偏「黄铜 + 华丽」，柴油朋克偏「钢铁 + 做旧」。'
+      id: 'memphis',
+      no: 35,
+      name: '孟菲斯风格',
+      en: 'Memphis Style',
+      group: '现代设计与平面',
+      desc: '几何图形 + 鲜艳撞色 + 波点条纹，活泼复古',
+      keywords: ['geometric shapes', 'clashing colour', 'dots and stripes', 'playful'],
+      prompt: '[subject], Memphis design style, bold geometric shapes, vivid clashing colours, polka dots stripes and squiggles, irregular playful composition, 1980s post-modern graphic design, light fun and retro, flat graphic layout',
+      negative: 'realistic rendering, muted, classical, symmetric, minimal monochrome',
+      tip: '孟菲斯和波普都撞色。区别：孟菲斯用几何图形（圆、三角、波浪线），波普用网点加名人符号。',
+      image: 'memphis.jpg'
     },
+    /* ---------- 36 清新森系风 ---------- */
     {
-      id: 'dieselpunk', no: 36, name: '柴油朋克', en: 'Dieselpunk', group: '数字与未来',
-      desc: '1940 年代复古未来、铆钉重工业、装饰艺术造型',
-      keywords: ['dieselpunk', 'retro-futurism 1940s', 'riveted metal', 'art deco'],
-      prompt: '[subject], dieselpunk, 1940s retro-futurism, heavy riveted metal plates, diesel engines, art deco shapes, gritty industrial haze, muted khaki and rust palette',
-      negative: 'gleaming chrome, clean futuristic, pastel, delicate, text, watermark',
-      tip: '关键词是「重」和「脏」。加 gritty / rust / worn 会立刻和蒸汽朋克拉开差距。'
+      id: 'forest-fresh',
+      no: 36,
+      name: '清新森系风',
+      en: 'Forest Fresh',
+      group: '影像与生活方式',
+      desc: '森林草地、自然光、低饱和绿，清透治愈',
+      keywords: ['forest greenery', 'natural light', 'low saturation green', 'airy'],
+      prompt: '[subject], fresh forest aesthetic, forest grassland flowers and plants, natural sunlight filtering through leaves, low saturation green palette, natural transparent healing mood, light and airy, soft bokeh, dappled light, film-like',
+      negative: 'urban, neon, dark moody, industrial, synthetic plastic',
+      tip: '森系的绿一定要「低饱和」，不然会变浓艳。加 dappled light 和 bokeh。',
+      image: 'forest-fresh.jpg'
     },
+    /* ---------- 37 童话绘本风 ---------- */
     {
-      id: 'solarpunk', no: 37, name: '太阳朋克', en: 'Solarpunk', group: '数字与未来',
-      desc: '白建筑配垂直花园、阳光充沛、乐观乌托邦',
-      keywords: ['solarpunk', 'vertical gardens', 'white architecture', 'optimistic utopian'],
-      prompt: '[subject], solarpunk, lush vertical gardens on white curved architecture, glass and solar panels, bright optimistic sunlight, clean elegant technology, green and white palette, utopian hopeful mood',
-      negative: 'dystopian, dark, rusty, gritty, pollution, text, watermark',
-      tip: '太阳朋克是「亮」的朋克。负面词里写 dark / dystopian 很重要，不然模型会往赛博朋克跑。'
+      id: 'fairytale-picturebook',
+      no: 37,
+      name: '童话绘本风',
+      en: 'Fairytale Picture Book',
+      group: '插画与动画',
+      desc: '柔和色彩 + 可爱角色 + 温暖场景，有故事感',
+      keywords: ['soft colours', 'cute characters', 'warm scenes', 'storybook'],
+      prompt: '[subject], fairytale picture book illustration, soft muted colours, cute lovable characters, warm cosy scenes, narrative storybook composition, imaginative and friendly, gentle lighting, hand-painted, paper texture',
+      negative: 'realistic, horror, harsh contrast, photo, dark',
+      tip: '绘本感来自「纸纹 + 柔和」，加 paper texture 和 hand-painted 立刻到位。',
+      image: 'fairytale-picturebook.jpg'
     },
+    /* ---------- 38 儿童插画风 ---------- */
     {
-      id: 'vaporwave', no: 38, name: '蒸汽波', en: 'Vaporwave', group: '数字与未来',
-      desc: '粉紫渐变、低分辨率 CRT、罗马雕塑、消费主义怀旧',
-      keywords: ['vaporwave', '90s retro digital', 'pink and cyan gradient', 'CRT texture'],
-      prompt: '[subject], vaporwave, 90s retro digital aesthetic, pink and cyan gradient, glitch artifacts, classical roman busts, palm tree silhouettes, low-res CRT texture, surreal consumer nostalgia',
-      negative: 'high resolution realism, warm natural tones, gritty detail, text, watermark',
-      tip: '和合成波的区别：蒸汽波偏「粉紫 + 静止怀旧」，合成波偏「霓虹网格 + 速度感」。'
+      id: 'children-illustration',
+      no: 38,
+      name: '儿童插画风',
+      en: 'Children Illustration',
+      group: '插画与动画',
+      desc: '造型圆润可爱、线条简洁安全，明亮柔和',
+      keywords: ['round soft shapes', 'bright gentle colour', 'simple safe lines', 'friendly'],
+      prompt: '[subject], children illustration, round cute rounded shapes, bright yet gentle colours, simple safe thick outlines, friendly expressive characters, flat clean colouring, suitable for picture books education and family content',
+      negative: 'realistic, scary, sharp angles, gritty texture, dark shadow, violence',
+      tip: '和童话绘本的区别：这条更「低幼」，线条更粗、造型更圆。适合教育内容和亲子场景。',
+      image: 'children-illustration.jpg'
     },
+    /* ---------- 39 漫画分镜风 ---------- */
     {
-      id: 'synthwave', no: 39, name: '合成波', en: 'Synthwave', group: '数字与未来',
-      desc: '霓虹网格地平线、线框太阳、80 年代速度感',
-      keywords: ['synthwave', '80s retro-futurism', 'neon grid horizon', 'wireframe sun'],
-      prompt: '[subject], synthwave, 80s retro-futurism, neon grid horizon, wireframe sun, chrome and purple, glowing outlines, dark background with neon accents, outrun aesthetic',
-      negative: 'daylight, pastel softness, rustic, hand-drawn texture, text, watermark',
-      tip: '必加 dark background。合成波的霓虹是在暗底上才亮的，放亮底会糊成一片。'
+      id: 'manga-storyboard',
+      no: 39,
+      name: '漫画分镜风',
+      en: 'Manga Storyboard',
+      group: '插画与动画',
+      desc: '黑白线稿 + 分格构图 + 速度线，讲故事节奏',
+      keywords: ['black and white line art', 'panel layout', 'speed lines', 'dynamic pose'],
+      prompt: '[subject], manga storyboard page, black and white ink line art, panel grid layout, speed lines, dialogue balloon space, dynamic action poses, dramatic camera angle, screentone shading, japanese comic',
+      negative: 'full colour, painterly, 3d render, soft gradient, photo',
+      tip: '一定要写 panel layout / comic page，否则模型只会给你一张黑白单图。',
+      image: 'manga-storyboard.jpg'
     },
+    /* ---------- 40 日系动画风 ---------- */
     {
-      id: 'lowpoly', no: 40, name: '低多边形', en: 'Low Poly', group: '数字与未来',
-      desc: '可见三角面、平面着色、几何简化',
-      keywords: ['low poly 3D', 'faceted geometry', 'flat shaded polygons', 'minimal palette'],
-      prompt: '[subject], low poly 3D art, visible triangular faceted geometry, flat shaded polygons, minimal color palette, stylized simple shapes, clean render, subtle gradient background',
-      negative: 'high detail, smooth surface, photorealistic, organic curves, text, watermark',
-      tip: '「能看见三角面」是全部意义。别加 smooth / high detail，加了你就要的是别的风格。'
+      id: 'japanese-anime',
+      no: 40,
+      name: '日系动画风',
+      en: 'Japanese Anime',
+      group: '插画与动画',
+      desc: '清晰线条 + 明亮色彩，青春热血的动画质感',
+      keywords: ['clean lines', 'bright colour', 'expressive characters', 'key visual'],
+      prompt: '[subject], Japanese anime style, clean crisp linework, bright vivid colours, expressive character emotion, detailed background scenery, youthful passionate fantasy mood, anime key visual, cel shading, high quality production art',
+      negative: 'photorealistic, 3d render, western cartoon, sketch, muted',
+      tip: '这是「通用日系动画」，比吉卜力更现代、更商业化。要赛璐璐质感就加 cel shading。',
+      image: 'japanese-anime.jpg'
     },
+    /* ---------- 41 浮世绘风格 ---------- */
     {
-      id: 'voxel', no: 41, name: '体素艺术', en: 'Voxel Art', group: '数字与未来',
-      desc: '方块堆叠、等距视角、锐利边缘',
-      keywords: ['voxel art', '3D pixel blocks', 'isometric view', 'magicavoxel render'],
-      prompt: '[subject], voxel art, 3D pixel blocks, cubic construction, isometric view, vibrant flat colors, sharp edges, MagicaVoxel render, playful game asset look',
-      negative: 'smooth surfaces, realistic texture, organic curves, text, watermark',
-      tip: '配等距视角（isometric）最经典。正面视角的体素会显得很平，没有立体魅力。'
+      id: 'ukiyo-e',
+      no: 41,
+      name: '浮世绘风格',
+      en: 'Ukiyo-e',
+      group: '东方美学',
+      desc: '平面化构图 + 清晰线条 + 大面积色块',
+      keywords: ['flat composition', 'clear outline', 'traditional pattern', 'woodblock'],
+      prompt: '[subject], ukiyo-e Japanese woodblock print, flat planar composition, crisp outlines, traditional decorative patterns, large solid colour blocks, waves and figures and landscape, japanese classical aesthetic, Hokusai influence, washi paper texture',
+      negative: '3d, photorealistic, western oil painting, soft gradient, depth of field',
+      tip: '浮世绘是版画，woodblock print 和 flat colour 必须有。想要《神奈川冲浪里》那种浪就写 great wave。',
+      image: 'ukiyo-e.jpg'
     },
+    /* ---------- 42 敦煌壁画风 ---------- */
     {
-      id: 'pixel-art', no: 42, name: '像素艺术', en: 'Pixel Art', group: '数字与未来',
-      desc: '有限色板、方形像素、抖动过渡、红白机质感',
-      keywords: ['8-bit pixel art', 'limited palette', 'square pixels', 'NES sprite'],
-      prompt: '[subject], 8-bit pixel art, limited color palette of 16 colors, visible square pixels, dithering for shading, retro NES sprite aesthetic, crisp edges, no anti-aliasing',
-      negative: 'blurry, anti-aliasing, smooth gradient, high resolution, text, watermark',
-      tip: 'no anti-aliasing 必须写。模型默认会做抗锯齿，出来的「像素」边缘是糊的。'
+      id: 'dunhuang-mural',
+      no: 42,
+      name: '敦煌壁画风',
+      en: 'Dunhuang Mural',
+      group: '东方美学',
+      desc: '矿物色彩 + 飞天飘带 + 斑驳墙面',
+      keywords: ['mineral pigments', 'flying apsaras', 'ribbons and lotus', 'aged texture'],
+      prompt: '[subject], Dunhuang cave mural, mineral pigment palette of ochre malachite and azurite, flying apsaras with flowing ribbons, lotus and auspicious clouds, weathered cracked plaster texture, gold leaf accents, solemn mysterious ancient oriental art',
+      negative: 'modern, glossy, neon, western style, clean digital, minimal',
+      tip: '斑驳墙皮是灵魂，写 cracked plaster / weathered pigment。配色用矿物颜料名（malachite、azurite）比写「绿色」准得多。',
+      image: 'dunhuang-mural.jpg'
     },
+    /* ---------- 43 宋代美学风 ---------- */
     {
-      id: 'glitch', no: 43, name: '故障艺术', en: 'Glitch Art', group: '数字与未来',
-      desc: 'RGB 错位、扫描线撕裂、数据损坏感',
-      keywords: ['glitch art', 'datamoshing', 'RGB channel separation', 'scanline distortion'],
-      prompt: '[subject], glitch art, datamoshing effect, RGB channel separation, scanline distortion, corrupted digital artifacts, neon color bleeding, VHS tracking error, high contrast',
-      negative: 'clean render, pristine image, soft focus, pastel, text, watermark',
-      tip: '底层要有一张「正常图」被破坏。加 corrupted 但别过度，过度后人脸和主体会完全散掉。'
+      id: 'song-dynasty',
+      no: 43,
+      name: '宋代美学风',
+      en: 'Song Dynasty Aesthetic',
+      group: '东方美学',
+      desc: '淡雅色彩 + 留白 + 花鸟山水，克制含蓄',
+      keywords: ['elegant muted colour', 'negative space', 'bird and flowers', 'literati'],
+      prompt: '[subject], Song dynasty aesthetic, delicate pale muted colours, generous negative space, birds flowers and landscape, refined objects and literati taste, restrained subtle temperament, soft even light, silk painting texture, classical Chinese elegance',
+      negative: 'gaudy, saturated, heavy gold, modern graphic, cartoon',
+      tip: '宋画的关键是「清雅克制」，负面词里把 gaudy / saturated 钉死。它和唐风是两极。',
+      image: 'song-dynasty.jpg'
     },
-
-    /* ============ 3D 渲染与手工材质 ============ */
+    /* ---------- 44 唐风美学 ---------- */
     {
-      id: 'unreal5', no: 44, name: 'UE5 写实渲染', en: 'Unreal Engine 5', group: '3D 渲染与手工材质',
-      desc: '光线追踪、全局光照、物理准确的材质',
-      keywords: ['unreal engine 5 render', 'ray tracing', 'global illumination', 'PBR materials'],
-      prompt: '[subject], Unreal Engine 5 render, hyperrealistic PBR materials, ray-traced reflections, global illumination, cinematic depth of field, 8K detail, physically accurate lighting',
-      negative: 'cartoon, flat shading, low poly, painterly, text, watermark',
-      tip: '这种风格拼的是「光」。加 ray-traced reflections 和 global illumination，画面质感立刻不一样。'
+      id: 'tang-dynasty',
+      no: 44,
+      name: '唐风美学',
+      en: 'Tang Dynasty Aesthetic',
+      group: '东方美学',
+      desc: '色彩华丽浓郁，人物丰润大气，服饰纹样精美',
+      keywords: ['rich opulent colour', 'plump figures', 'ornate textile', 'prosperity'],
+      prompt: '[subject], Tang dynasty aesthetic, rich opulent colours, plump graceful figures, elaborate embroidered textile patterns, prosperous cosmopolitan atmosphere, gold and vermilion, courtly magnificence, classical Chinese fresco feel',
+      negative: 'pale muted, minimalist, negative space, modern, western',
+      tip: '唐风要「浓」、宋风要「淡」，两条别写反。唐风常配朱红、石绿、金。',
+      image: 'tang-dynasty.jpg'
     },
+    /* ---------- 45 国潮插画风 ---------- */
     {
-      id: 'octane', no: 45, name: 'Octane 商业渲染', en: 'Octane Render', group: '3D 渲染与手工材质',
-      desc: '影棚级布光、干净背景、商品级锐利细节',
-      keywords: ['octane render', 'studio lighting', 'subsurface materials', 'commercial quality'],
-      prompt: '[subject], Octane Render, professional 3D studio lighting, glossy subsurface materials, clean seamless studio background, razor-sharp product detail, commercial advertising quality',
-      negative: 'cluttered background, amateur lighting, noise, grain, text, watermark',
-      tip: '适合产品图、图标、单物件。要干净就配 clean seamless background，别让它加场景。'
+      id: 'guochao-illustration',
+      no: 45,
+      name: '国潮插画风',
+      en: 'Guochao Illustration',
+      group: '东方美学',
+      desc: '传统元素 + 现代潮流图形，高饱和醒目',
+      keywords: ['traditional motifs', 'modern trendy graphic', 'saturated', 'decorative'],
+      prompt: '[subject], Guochao Chinese trendy illustration, traditional cultural motifs fused with modern graphic trends, highly saturated colours, bold eye-catching composition, decorative symbols and patterns, youthful oriental visual, poster design quality',
+      negative: 'classical antique, muted, western, minimalist, retro film',
+      tip: '国潮 = 传统元素 + 潮牌排版。补 poster layout / flat graphic，避免画成古画。',
+      image: 'guochao-illustration.jpg'
     },
+    /* ---------- 46 皮克斯式 3D 动画风 ---------- */
     {
-      id: 'claymation', no: 46, name: '黏土定格', en: 'Claymation', group: '3D 渲染与手工材质',
-      desc: '橡皮泥质感、指纹痕迹、手工微缩布景',
-      keywords: ['claymation stop-motion', 'plasticine texture', 'handmade set', 'aardman style'],
-      prompt: '[subject], claymation stop-motion, plasticine clay texture, visible fingerprints and tool marks, handmade miniature set, soft studio lighting, Aardman style, charming imperfection',
-      negative: 'smooth digital render, glossy plastic, photorealistic, text, watermark',
-      tip: '「不完美」才是卖点：加 visible fingerprints / imperfection，做得太光滑就假了。'
+      id: 'pixar-3d-animation',
+      no: 46,
+      name: '皮克斯式 3D 动画风',
+      en: 'Pixar-style 3D Animation',
+      group: '3D 与游戏美术',
+      desc: '圆润角色 + 明亮色彩 + 细腻材质 + 丰富表情',
+      keywords: ['rounded characters', 'bright colour', 'detailed material', 'expressive'],
+      prompt: '[subject], Pixar-style 3D animation, rounded appealing character design, bright cheerful colours, finely detailed materials, rich facial expression, warm friendly storytelling mood, soft global illumination, subsurface skin, animated feature film render',
+      negative: '2d flat, anime, sketch, photorealistic uncanny, low poly',
+      tip: '一定要写 3D render / animated feature film，否则会退成 2D 卡通风。加 subsurface scattering 皮肤更高级。',
+      image: 'pixar-3d-animation.jpg'
     },
+    /* ---------- 47 迪士尼式童话风 ---------- */
     {
-      id: 'papercut', no: 47, name: '纸雕艺术', en: 'Papercut', group: '3D 渲染与手工材质',
-      desc: '多层纸片堆叠、锐利裁边、层间投影',
-      keywords: ['layered papercut art', 'stacked paper', 'crisp cut edges', 'soft drop shadows'],
-      prompt: '[subject], layered papercut art, stacked colored paper layers, crisp cut edges, soft drop shadows between layers, real depth and dimension, handcrafted paper craft, flat pastel palette',
-      negative: 'single flat layer, painting, brushstrokes, digital gradient, text, watermark',
-      tip: '关键在「层间阴影」。写 soft drop shadows between layers，否则看起来像平面插画而不是纸雕。'
+      id: 'disney-fairytale',
+      no: 47,
+      name: '迪士尼式童话风',
+      en: 'Disney Fairytale',
+      group: '3D 与游戏美术',
+      desc: '梦幻城堡 + 华丽服饰 + 柔和光效，浪漫叙事',
+      keywords: ['dream castle', 'ornate costume', 'soft glow', 'romantic'],
+      prompt: '[subject], Disney-style fairytale, dreamy castle, ornate costume, soft magical glow, sparkle particles, romantic narrative mood, warm fantasy atmosphere, musical storybook feeling, polished 3d animation render',
+      negative: 'gritty realism, horror, muted desaturated, sketch, low quality',
+      tip: '和皮克斯的区别：迪士尼更「华丽浪漫魔法」，皮克斯更「圆润日常」。城堡和魔法光效是标志。',
+      image: 'disney-fairytale.jpg'
     },
+    /* ---------- 48 3D 盲盒风 ---------- */
     {
-      id: 'stained-glass', no: 48, name: '玻璃彩绘', en: 'Stained Glass', group: '3D 渲染与手工材质',
-      desc: '粗黑铅条分隔、宝石色透光玻璃',
-      keywords: ['stained glass art', 'black lead lines', 'translucent colored glass', 'backlit'],
-      prompt: '[subject], stained glass window art, thick black lead lines separating shapes, glowing translucent colored glass, jewel tones, church light, luminous backlit detail',
-      negative: 'continuous painting, no outlines, matte surface, dull colors, text, watermark',
-      tip: '「黑铅条」是结构骨架，必须写 thick black lead lines，否则就是一幅彩色画而已。'
+      id: 'blind-box-3d',
+      no: 48,
+      name: '3D 盲盒风',
+      en: 'Blind Box Figure',
+      group: '3D 与游戏美术',
+      desc: 'Q 版比例 + 圆润造型 + 塑胶玩具质感',
+      keywords: ['chibi proportion', 'rounded form', 'vinyl toy material', 'product shot'],
+      prompt: '[subject], blind box collectible figure, chibi proportions, rounded cute form, glossy vinyl PVC material, soft studio lighting, pastel background, product photo of designer toy, high detail render',
+      negative: 'realistic human proportion, gritty, flat 2d, textured oil painting',
+      tip: '材质词是关键：vinyl / PVC / glossy plastic。补 product photo 和 clean background 才有「实物摆件」感。',
+      image: 'blind-box-3d.jpg'
     },
+    /* ---------- 49 毛毡手作风 ---------- */
     {
-      id: 'dunhuang', no: 49, name: '敦煌壁画', en: 'Dunhuang Mural', group: '3D 渲染与手工材质',
-      desc: '矿物颜料色、飞天飘带、斑驳墙面',
-      keywords: ['dunhuang mural', 'ancient cave painting', 'mineral pigments', 'flying apsaras'],
-      prompt: '[subject], Dunhuang mural style, ancient Chinese cave painting, mineral pigment colors, ochre red and azurite blue, flowing apsaras flying figures with long ribbons, weathered cracked wall texture, Tang dynasty aesthetic',
-      negative: 'modern digital art, glossy finish, clean surface, neon colors, text, watermark',
-      tip: '做游戏皮肤包很吃这套。加 weathered cracked wall texture 会有壁画特有的「旧」，不加就是普通国风插画。'
+      id: 'felt-craft',
+      no: 49,
+      name: '毛毡手作风',
+      en: 'Felt Handcraft',
+      group: '手工与材质',
+      desc: '柔软纤维 + 手工缝制痕迹，温暖治愈',
+      keywords: ['soft fibre', 'visible stitching', 'muted colour', 'handmade'],
+      prompt: '[subject], needle felted wool craft, soft fuzzy fibre texture, visible hand stitching, low saturation cosy colours, cute rounded handmade shape, warm soft lighting, macro craft photography, artisan handmade feel',
+      negative: 'glossy plastic, metal, sharp edges, clean digital render, neon',
+      tip: '毛毡靠「纤维感」，写 fuzzy / fibrous / wool fibres。加 macro photography 才有手作的细节。',
+      image: 'felt-craft.jpg'
     },
+    /* ---------- 50 剪纸风格 ---------- */
     {
-      id: 'porcelain', no: 50, name: '青花瓷', en: 'Blue-and-White Porcelain', group: '3D 渲染与手工材质',
-      desc: '钴蓝勾线、白釉底、缠枝纹样、开片质感',
-      keywords: ['blue and white porcelain', 'cobalt blue on white', 'ming dynasty motif', 'crackle glaze'],
-      prompt: '[subject], blue and white porcelain painting, cobalt blue on white ceramic glaze, delicate brushwork, Chinese Ming dynasty motif, crackle glaze texture, elegant flowing traditional pattern',
-      negative: 'full color palette, glossy plastic, modern graphic, heavy shadows, text, watermark',
-      tip: '和蓝晒很像但基底不同：蓝晒是「纸」，青花是「瓷」。加 ceramic glaze 才会出瓷器那种润泽反光。'
+      id: 'paper-cut',
+      no: 50,
+      name: '剪纸风格',
+      en: 'Paper Cut',
+      group: '手工与材质',
+      desc: '平面层叠 + 镂空边缘 + 纸张纹理',
+      keywords: ['layered paper', 'cut edges', 'folk pattern', 'festive'],
+      prompt: '[subject], paper cut art, flat layered paper, laser-cut edges, paper texture and subtle drop shadow, traditional decorative patterns, folk and festive mood, handcraft feel, layered depth',
+      negative: 'glossy 3d, photorealistic, oil paint, soft gradient, neon',
+      tip: '层叠和投影是立体感的来源，写 layered depth 和 paper shadow。中式剪纸再加 Chinese folk pattern。',
+      image: 'paper-cut.jpg'
+    },
+    /* ---------- 51 美式漫画风 ---------- */
+    {
+      id: 'american-comic',
+      no: 51,
+      name: '美式漫画风',
+      en: 'American Comic',
+      group: '插画与动画',
+      desc: '粗线条 + 高对比色块 + 夸张表情与动态构图',
+      keywords: ['bold outline', 'high contrast', 'exaggerated expression', 'dynamic'],
+      prompt: '[subject], American comic book style, bold thick outlines, high contrast colour blocks, exaggerated expression, dynamic heroic composition, dramatic shading, halftone texture, superhero narrative energy, ink and flat colour',
+      negative: 'anime, soft pastel, 3d render, watercolour, muted',
+      tip: '美漫和波普都是粗描边。区别是美漫有英雄姿态和戏剧光，波普是网点加消费符号。',
+      image: 'american-comic.jpg'
+    },
+    /* ---------- 52 像素艺术风 ---------- */
+    {
+      id: 'pixel-art',
+      no: 52,
+      name: '像素艺术风',
+      en: 'Pixel Art',
+      group: '3D 与游戏美术',
+      desc: '低分辨率方块像素，复古游戏感',
+      keywords: ['low resolution pixels', 'retro game', 'limited palette', 'sprite'],
+      prompt: '[subject], pixel art, low resolution blocky pixels, crisp pixel edges with no anti-aliasing, limited retro palette, 16-bit game sprite aesthetic, side view or isometric, nostalgic retro game mood',
+      negative: 'smooth gradient, vector, photorealistic, blurry, high resolution detail',
+      tip: '必须写 no anti-aliasing / crisp pixels，否则模型会给你「模糊的马赛克」。加 16-bit sprite 更明确。',
+      image: 'pixel-art.jpg'
+    },
+    /* ---------- 53 低多边形风 ---------- */
+    {
+      id: 'low-poly',
+      no: 53,
+      name: '低多边形风',
+      en: 'Low Poly',
+      group: '3D 与游戏美术',
+      desc: '几何切面 + 简化形体 + 块面色彩',
+      keywords: ['geometric facets', 'simplified form', 'flat shading', 'block colour'],
+      prompt: '[subject], low poly 3d art, geometric faceted surfaces, simplified forms, flat shading with visible triangular facets, limited block colour palette, clean modern game-art look, subtle ambient occlusion',
+      negative: 'smooth subdivision, photorealistic, high detail texture, 2d flat vector',
+      tip: '写 triangular facets 和 flat shading。想更高级就补 isometric low poly scene。',
+      image: 'low-poly.jpg'
+    },
+    /* ---------- 54 黏土动画风 ---------- */
+    {
+      id: 'claymation',
+      no: 54,
+      name: '黏土动画风',
+      en: 'Claymation',
+      group: '手工与材质',
+      desc: '柔软黏土材质 + 手工塑形痕迹，可爱质朴',
+      keywords: ['soft clay', 'fingerprints', 'rounded chunky forms', 'tactile'],
+      prompt: '[subject], claymation stop-motion style, soft clay and plasticine material, visible hand-sculpted fingerprints, rounded chunky forms, gentle studio lighting, cute naive playful mood, tactile handmade feel, macro depth of field',
+      negative: 'glossy metal, sharp digital, photorealistic human, neon, flat vector',
+      tip: '指纹痕迹（fingerprints）是灵魂。加 macro 和 shallow depth of field 更像定格拍摄。',
+      image: 'claymation.jpg'
+    },
+    /* ---------- 55 定格动画风 ---------- */
+    {
+      id: 'stop-motion',
+      no: 55,
+      name: '定格动画风',
+      en: 'Stop-Motion',
+      group: '手工与材质',
+      desc: '手工模型 + 微缩场景 + 真实材质，逐帧质感',
+      keywords: ['handcrafted models', 'miniature set', 'real materials', 'frame-by-frame'],
+      prompt: '[subject], stop-motion animation, handcrafted models, miniature practical set, real fabric wood and paper materials, frame-by-frame tactile quality, warm nostalgic storybook mood, shallow depth of field, studio lighting',
+      negative: 'cgi smooth, digital render, photorealistic, flat 2d, neon',
+      tip: '和黏土动画的区别：定格更强调「微缩实景 + 多种真实材质」（布、木、纸）。',
+      image: 'stop-motion.jpg'
+    },
+    /* ---------- 56 水彩插画风 ---------- */
+    {
+      id: 'watercolor',
+      no: 56,
+      name: '水彩插画风',
+      en: 'Watercolour Illustration',
+      group: '插画与动画',
+      desc: '透明水色 + 自然晕染 + 柔和边缘',
+      keywords: ['transparent wash', 'natural bleed', 'soft edges', 'wet-on-wet'],
+      prompt: '[subject], watercolour illustration, transparent watercolour washes, natural pigment bleeding, soft feathered edges, light layered build-up, visible paper grain, wet-on-wet blooms, fresh gentle airy mood, white paper breathing space',
+      negative: 'opaque acrylic, thick impasto, digital gradient, 3d, neon',
+      tip: '湿画法的「晕开」是核心，写 wet-on-wet 和 bleeding。加 paper texture 和 white space 更真。',
+      image: 'watercolor.jpg'
+    },
+    /* ---------- 57 彩铅插画风 ---------- */
+    {
+      id: 'colored-pencil',
+      no: 57,
+      name: '彩铅插画风',
+      en: 'Coloured Pencil',
+      group: '插画与动画',
+      desc: '细腻笔触 + 柔和叠色，温暖亲切',
+      keywords: ['fine strokes', 'soft layering', 'hand-drawn texture', 'hatching'],
+      prompt: '[subject], coloured pencil illustration, fine visible pencil strokes, soft layered blending, hand-drawn paper texture, subtle hatching, warm intimate detail-rich rendering, sketchbook quality',
+      negative: 'digital flat colour, oil impasto, 3d render, neon, glossy',
+      tip: '要留下「笔痕」，写 visible strokes / hatching，别一味写 smooth blending。',
+      image: 'colored-pencil.jpg'
+    },
+    /* ---------- 58 铅笔素描风 ---------- */
+    {
+      id: 'pencil-sketch',
+      no: 58,
+      name: '铅笔素描风',
+      en: 'Pencil Sketch',
+      group: '插画与动画',
+      desc: '黑白灰线条 + 明暗排线，塑造形体结构',
+      keywords: ['graphite', 'hatching', 'form modelling', 'black and white'],
+      prompt: '[subject], graphite pencil sketch, black white and grey tones, hatching and cross-hatching, structural form modelling, subtle tone transitions, textured sketch paper, hand-drawn foundation, refined academic drawing',
+      negative: 'colour, painting, digital render, 3d, thick impasto',
+      tip: '形体塑造靠 cross-hatching，写上就不会糊成一团灰。',
+      image: 'pencil-sketch.jpg'
+    },
+    /* ---------- 59 炭笔素描风 ---------- */
+    {
+      id: 'charcoal-sketch',
+      no: 59,
+      name: '炭笔素描风',
+      en: 'Charcoal Sketch',
+      group: '插画与动画',
+      desc: '黑白对比更强，笔触粗犷有力',
+      keywords: ['strong contrast', 'rough strokes', 'deep blacks', 'expressive'],
+      prompt: '[subject], charcoal drawing, strong black and white contrast, rough expressive strokes, smudged shading, rich deep blacks, textured paper tooth, portrait and figure study, raw emotional power',
+      negative: 'colour, fine delicate line, digital smooth, glossy, pastel soft',
+      tip: '炭笔要「黑得下去」，写 deep blacks 和 rough gesture。人像、人体的表现力最强。',
+      image: 'charcoal-sketch.jpg'
+    },
+    /* ---------- 60 油画写实风 ---------- */
+    {
+      id: 'realistic-oil-painting',
+      no: 60,
+      name: '油画写实风',
+      en: 'Realistic Oil Painting',
+      group: '绘画流派',
+      desc: '真实光影 + 细腻色彩过渡 + 古典绘画质感',
+      keywords: ['true light', 'smooth transition', 'painterly realism', 'canvas texture'],
+      prompt: '[subject], realistic oil painting, accurate light and shadow, smooth delicate colour transitions, thick but controlled material, subtle canvas texture, classical painting craft, elegant composed artistic quality, old master finish',
+      negative: 'flat illustration, vector, anime, neon, sketch',
+      tip: '和「古典写实油画风」的区别：这条是通用写实油画，后者特指博物馆级古典题材（历史场景、精致服饰）。',
+      image: 'realistic-oil-painting.jpg'
+    },
+    /* ---------- 61 古典写实油画风 ---------- */
+    {
+      id: 'classical-realism-oil',
+      no: 61,
+      name: '古典写实油画风',
+      en: 'Classical Realism Oil',
+      group: '绘画流派',
+      desc: '人物结构 + 柔和明暗 + 精致服饰与历史场景',
+      keywords: ['figure structure', 'soft chiaroscuro', 'period costume', 'museum quality'],
+      prompt: '[subject], classical realistic oil painting, emphasis on figure anatomy, soft chiaroscuro modelling, exquisite period costume, historical scene, museum-grade classical art quality, warm varnish tone, academic master study',
+      negative: 'modern clothing, cartoon, digital flat, neon, snapshot photo',
+      tip: '想要「博物馆感」就加 warm varnish / aged canvas。精致服饰和历史场景是它的识别点。',
+      image: 'classical-realism-oil.jpg'
+    },
+    /* ---------- 62 幻想史诗风 ---------- */
+    {
+      id: 'epic-fantasy',
+      no: 62,
+      name: '幻想史诗风',
+      en: 'Epic Fantasy',
+      group: '暗黑与超现实',
+      desc: '宏大场景 + 英雄人物 + 魔法光效，叙事感强',
+      keywords: ['grand scene', 'hero figure', 'magic light', 'mythic'],
+      prompt: '[subject], epic fantasy art, grand sweeping scene, heroic figures, glowing magic effects, war and mythic elements, dramatic volumetric god rays, awe-inspiring narrative scale, matte painting quality, concept art',
+      negative: 'mundane, small scale, cosy domestic, cartoon, minimal',
+      tip: '卷轴感的来源是「规模 + 光效」，写 god rays 和 epic scale。适合奇幻战争、神话题材。',
+      image: 'epic-fantasy.jpg'
+    },
+    /* ---------- 63 暗黑奇幻风 ---------- */
+    {
+      id: 'dark-fantasy',
+      no: 63,
+      name: '暗黑奇幻风',
+      en: 'Dark Fantasy',
+      group: '暗黑与超现实',
+      desc: '低明度色彩 + 怪物古堡迷雾，危险神秘',
+      keywords: ['low key colour', 'monsters', 'ruined castle', 'mist'],
+      prompt: '[subject], dark fantasy art, low key desaturated palette, monsters and skeletons, ruined castle, drifting mist, magic runes, oppressive mysterious dangerous world, dramatic rim light, gritty concept art',
+      negative: 'bright cheerful, cute, pastel, sunny, kawaii',
+      tip: '和暗黑哥特的区别：暗黑奇幻一定要有「怪物化元素」，哥特是建筑与氛围。',
+      image: 'dark-fantasy.jpg'
+    },
+    /* ---------- 64 东方玄幻风 ---------- */
+    {
+      id: 'eastern-fantasy',
+      no: 64,
+      name: '东方玄幻风',
+      en: 'Eastern Fantasy',
+      group: '东方美学',
+      desc: '仙侠人物 + 云海山川 + 法器灵兽',
+      keywords: ['xianxia characters', 'sea of clouds', 'magic artifacts', 'spirit beasts'],
+      prompt: '[subject], Chinese xuanhuan fantasy, xianxia characters in flowing robes, sea of clouds and towering mountains, magic artifacts and glowing talismans, spirit beasts, ancient Chinese costume detail, ethereal divine light, majestic mythic oriental fantasy, concept art',
+      negative: 'western knight, european castle, modern, sci-fi, cartoon',
+      tip: '关键词是「云海、法器、灵兽、古风服饰」，加 ethereal glow 才有仙气。',
+      image: 'eastern-fantasy.jpg'
+    },
+    /* ---------- 65 仙侠水墨风 ---------- */
+    {
+      id: 'xianxia-ink',
+      no: 65,
+      name: '仙侠水墨风',
+      en: 'Xianxia Ink',
+      group: '东方美学',
+      desc: '水墨山水 + 云雾 + 长袍飞剑 + 留白',
+      keywords: ['ink mountains', 'mist', 'flowing robe', 'flying sword'],
+      prompt: '[subject], xianxia ink wash art, ink-painted mountains and mist, flowing long robes, flying sword and bamboo, generous negative space, ethereal graceful poetic mood, oriental cultivation aesthetic, minimal monochrome with subtle accent',
+      negative: 'heavy colour, western oil painting, cyberpunk, ornate baroque, 3d render',
+      tip: '这是「水墨」和「仙侠」的叠加，两个关键词都要有：ink wash 加 xianxia。',
+      image: 'xianxia-ink.jpg'
+    },
+    /* ---------- 66 机械朋克风 ---------- */
+    {
+      id: 'mechanical-punk',
+      no: 66,
+      name: '机械朋克风',
+      en: 'Mechanical Punk',
+      group: '科幻与未来',
+      desc: '机械结构 + 钢铁材质 + 巨大装置与引擎细节',
+      keywords: ['mechanical structure', 'steel', 'giant machinery', 'gears and engines'],
+      prompt: '[subject], mechanical punk style, exposed mechanical structure, heavy steel and iron material, giant machinery, intricate gears and engine detail, oily metal surface, industrial power feel, hardcore tech fantasy, dramatic industrial light',
+      negative: 'organic soft, floral, pastel, cute, medieval fantasy',
+      tip: '和蒸汽朋克的区别：机械朋克是钢铁引擎（更硬、更工业），蒸汽朋克是黄铜齿轮加维多利亚。',
+      image: 'mechanical-punk.jpg'
+    },
+    /* ---------- 67 生物机械风 ---------- */
+    {
+      id: 'biomechanical',
+      no: 67,
+      name: '生物机械风',
+      en: 'Biomechanical',
+      group: '科幻与未来',
+      desc: '人体组织与机械结构融合，诡异而有冲击力',
+      keywords: ['flesh fused with machine', 'eerie', 'organic tech', 'hybrid'],
+      prompt: '[subject], biomechanical art, human body and biological tissue fused with mechanical structure, organic-mechanical hybrid, eerie unsettling beauty, cold futuristic life-science feel, wet slick surfaces, strong visual impact',
+      negative: 'cute, soft pastel, cartoon, wholesome, floral',
+      tip: '加 Giger 或 organic-mechanical hybrid 效果最强。这条天生不适合可爱主体。',
+      image: 'biomechanical.jpg'
+    },
+    /* ---------- 68 赛博东方风 ---------- */
+    {
+      id: 'cyber-oriental',
+      no: 68,
+      name: '赛博东方风',
+      en: 'Cyber Oriental',
+      group: '科幻与未来',
+      desc: '霓虹科技 + 东方建筑 + 汉字灯牌与龙纹',
+      keywords: ['neon tech', 'oriental architecture', 'hanzi signage', 'dragon motifs'],
+      prompt: '[subject], cyber oriental style, neon technology fused with Chinese traditional architecture, glowing hanzi signage, dragon motifs and upturned eaves, mechanical prosthetic detail, futuristic oriental cityscape, rain and reflection, magenta and cyan neon',
+      negative: 'western cyberpunk only, medieval, pastoral, watercolour, minimal',
+      tip: '这是「赛博朋克 × 国风」的混搭。东方元素（汉字灯牌、飞檐、龙纹）必须有，否则就是普通赛博。',
+      image: 'cyber-oriental.jpg'
+    },
+    /* ---------- 69 新怪谈风 ---------- */
+    {
+      id: 'new-weird',
+      no: 69,
+      name: '新怪谈风',
+      en: 'New Weird',
+      group: '暗黑与超现实',
+      desc: '日常场景里的诡异细节，平静中带不安',
+      keywords: ['mundane scene', 'uncanny detail', 'muted', 'quiet unease'],
+      prompt: '[subject], new weird fiction illustration, ordinary everyday scene with subtly wrong details, low saturation palette, uncanny surreal realism, psychological suspense mood, calm surface with quiet unease, flat even light, unsettling stillness',
+      negative: 'gore, jump scare, high saturation, epic fantasy, cartoon',
+      tip: '新怪谈的恐怖是「平静里的不对劲」。别写 horror / monster，写 subtly wrong 和 uncanny。',
+      image: 'new-weird.jpg'
+    },
+    /* ---------- 70 梦核风格 ---------- */
+    {
+      id: 'dreamcore',
+      no: 70,
+      name: '梦核风格',
+      en: 'Dreamcore',
+      group: '暗黑与超现实',
+      desc: '空旷空间 + 柔和光线 + 童年物件，熟悉又陌生',
+      keywords: ['empty space', 'soft light', 'childhood objects', 'illogical'],
+      prompt: '[subject], dreamcore aesthetic, vast empty spaces, soft hazy light, childhood objects and nostalgic props, illogical dreamlike scene, familiar yet strange atmosphere, pastel haze, liminal dream feeling, low detail realism',
+      negative: 'sharp detail, coherent logic, high contrast, action, neon cyberpunk',
+      tip: '要有「童年物件 + 空旷 + 柔光」，加 nostalgic / hazy 就对了。',
+      image: 'dreamcore.jpg'
+    },
+    /* ---------- 71 怪核风格 ---------- */
+    {
+      id: 'weirdcore',
+      no: 71,
+      name: '怪核风格',
+      en: 'Weirdcore',
+      group: '暗黑与超现实',
+      desc: '废弃空间 + 异常比例 + 失真色彩，荒诞不适',
+      keywords: ['abandoned space', 'wrong proportion', 'distorted colour', 'uncanny'],
+      prompt: '[subject], weirdcore aesthetic, abandoned interior space, wrong unnatural proportions, strange creatures, distorted oversaturated colours, compressed low quality image artifacts, amateur flash photography, unsettling absurd internet culture vibe',
+      negative: 'polished, professional photo, harmonious colour, elegant, minimal',
+      tip: '怪核故意要「糊、歪、失真」。低画质滤镜（jpeg artifacts、flash photo）在这里反而是加分项。',
+      image: 'weirdcore.jpg'
+    },
+    /* ---------- 72 Liminal Space 风格 ---------- */
+    {
+      id: 'liminal-space',
+      no: 72,
+      name: 'Liminal Space 风格',
+      en: 'Liminal Space',
+      group: '暗黑与超现实',
+      desc: '空无一人的走廊、泳池、商场，熟悉又诡异',
+      keywords: ['empty corridor', 'transitional space', 'eerie stillness', 'fluorescent light'],
+      prompt: '[subject], liminal space, completely empty transitional space, endless corridor and stairs, abandoned swimming pool and shopping mall, flat fluorescent lighting, eerie lonely suspended atmosphere, familiar yet wrong, wide angle',
+      negative: 'people, crowd, warm cosy, action, ornate decoration',
+      tip: '必须「无人」。负面词里保留 people / crowd，否则模型总会塞个人进去。',
+      image: 'liminal-space.jpg'
+    },
+    /* ---------- 73 蒸汽波风格 ---------- */
+    {
+      id: 'vaporwave',
+      no: 73,
+      name: '蒸汽波风格',
+      en: 'Vaporwave',
+      group: '现代设计与平面',
+      desc: '粉紫蓝渐变 + 复古电脑界面 + 古典雕塑与网格地面',
+      keywords: ['pink purple gradient', 'retro computer UI', 'classical sculpture', 'grid floor'],
+      prompt: '[subject], vaporwave aesthetic, pink purple blue gradient, retro 90s computer interface, classical marble sculpture, palm trees, neon grid floor, sun setting on the horizon, nostalgic psychedelic electronic mood, VHS glitch',
+      negative: 'natural daylight, rustic, hand-drawn, medieval, clean modern',
+      tip: '配方固定：粉紫渐变 + 石膏像 + 网格地面 + 落日。四个都有就是标准蒸汽波。',
+      image: 'vaporwave.jpg'
+    },
+    /* ---------- 74 复古未来主义风 ---------- */
+    {
+      id: 'retro-futurism',
+      no: 74,
+      name: '复古未来主义风',
+      en: 'Retro-Futurism',
+      group: '科幻与未来',
+      desc: '过去时代想象的未来：圆润飞船、老式仪表、银色金属',
+      keywords: ['rounded spaceship', 'analog dials', 'silver metal', 'optimistic tech'],
+      prompt: '[subject], retro-futurism, the future as imagined by past generations, rounded chrome spaceship, analog dials and gauges, brushed silver metal, warm amber instrument light, optimistic techno-utopian mood, 1960s space age design',
+      negative: 'dystopian grime, cyberpunk neon, medieval, rustic, modern minimal',
+      tip: '和赛博朋克正好相反：这条是「乐观的旧未来」。加 space age / 1960s 更准。',
+      image: 'retro-futurism.jpg'
+    },
+    /* ---------- 75 红金国潮风 ---------- */
+    {
+      id: 'red-gold-guochao',
+      no: 75,
+      name: '红金国潮风',
+      en: 'Red-Gold Guochao',
+      group: '东方美学',
+      desc: '中国红 + 鎏金色 + 传统纹样，喜庆华丽醒目',
+      keywords: ['chinese red', 'gilded gold', 'traditional pattern', 'festive poster'],
+      prompt: '[subject], red and gold Chinese festive design, Chinese red with gilded gold, traditional auspicious patterns, lantern and cloud motifs, modern typographic layout, celebratory opulent eye-catching mood, festive poster design, flat graphic quality',
+      negative: 'muted, minimalist, pastel, western, dark moody, grunge',
+      tip: '适合节日、品牌海报。要「喜庆」就保持红金高饱和加对称构图。',
+      image: 'red-gold-guochao.jpg'
     }
   ]
 };
